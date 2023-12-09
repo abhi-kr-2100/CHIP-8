@@ -15,6 +15,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CHIP-8.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="font-data.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
