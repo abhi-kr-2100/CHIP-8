@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
 #include <array>
 
 #include "font-data.hpp"
@@ -17,10 +16,14 @@ constexpr auto FRAME_BUFFER_HEIGHT = 32 /* pixels */;
 
 constexpr auto FONT_DATA_START_LOCATION = 0x50;
 
+constexpr auto INSTRUCTION_SIZE = 2 /* bytes */;
+constexpr auto PROGRAM_DATA_START_LOCATION = 0x200;
+constexpr auto MAX_NUM_INSTRUCTIONS = (MEMORY_SIZE - PROGRAM_DATA_START_LOCATION) / INSTRUCTION_SIZE;
+
 class CHIP_8
 {
 public:
-	void load_program(const std::vector<std::uint16_t>& program);
+	void load_program(const std::array<std::uint16_t, MAX_NUM_INSTRUCTIONS>& program);
 	void run();
 
 	CHIP_8()
