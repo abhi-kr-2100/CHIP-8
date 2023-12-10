@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 		instruction_t combined = bytes[i];
 		for (size_t j = 1; j < INSTRUCTION_SIZE; ++j)
 		{
-			combined = combined << (sizeof(byte) * bits_per_byte) | bytes[i + j];
+			combined = combined << (sizeof(byte) * BITS_PER_BYTE) | bytes[i + j];
 		}
 
 		program[j] = combined;
