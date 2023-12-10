@@ -131,6 +131,7 @@
     <ClInclude Include="font-data.hpp" />
     <ClInclude Include="executors-data.hpp" />
     <ClInclude Include="data-types.hpp" />
+    <ClInclude Include="helpers.hpp" />
     <ClInclude Include="machine-specs.hpp" />
   </ItemGroup>
   <ItemGroup>

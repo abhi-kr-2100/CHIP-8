@@ -30,6 +30,9 @@
     <ClInclude Include="machine-specs.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="helpers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

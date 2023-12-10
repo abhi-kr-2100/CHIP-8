@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "CHIP-8.hpp"
+#include "helpers.hpp"
 
 using std::cerr;
 using std::cin;
@@ -29,13 +30,11 @@ int main(int argc, char* argv[])
 	array<instruction_t, MAX_NUM_INSTRUCTIONS> program{};
 	for (size_t i = 0, j = 0, sz = bytes.size(); i < sz; i += INSTRUCTION_SIZE, ++j)
 	{
-		instruction_t combined = bytes[i];
-		for (size_t j = 1; j < INSTRUCTION_SIZE; ++j)
-		{
-			combined = combined << (sizeof(byte) * BITS_PER_BYTE) | bytes[i + j];
-		}
+		byte first = bytes[i];
+		byte second = bytes[i + 1];
 
-		program[j] = combined;
+		instruction_t ins = concatenate_bytes(first, second);
+		program[j] = ins;
 	}
 
 	CHIP_8 machine;
