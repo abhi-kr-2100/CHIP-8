@@ -13,6 +13,8 @@ using byte = std::uint8_t;
 using double_byte = std::uint16_t;
 using instruction_t = double_byte;
 
+constexpr auto bits_per_byte = 8;
+
 constexpr auto MEMORY_SIZE = 4096 /* bytes */;
 constexpr auto STACK_SIZE = 32 /* bytes */;
 constexpr auto STACK_ENTRY_SIZE = 2 /* bytes */;
