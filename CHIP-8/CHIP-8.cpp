@@ -20,10 +20,11 @@ CHIP_8::CHIP_8()
 
 void CHIP_8::load_program(const std::array<instruction_t, MAX_NUM_INSTRUCTIONS>& program)
 {
-	for (size_t i = 0; i < MAX_NUM_INSTRUCTIONS; ++i)
+	for (size_t i = 0, j = 0; i < MAX_NUM_INSTRUCTIONS; ++i, j += 2)
 	{
 		assert(i + PROGRAM_DATA_START_LOCATION < MEMORY_SIZE);
-		memory[i + PROGRAM_DATA_START_LOCATION] = program[i];
+		memory[j + PROGRAM_DATA_START_LOCATION] = program[i] >> (sizeof(byte) * bits_per_byte);
+		memory[j + 1 + PROGRAM_DATA_START_LOCATION] = program[i] & 0x00FF;
 	}
 }
 
