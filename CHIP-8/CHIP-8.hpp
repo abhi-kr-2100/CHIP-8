@@ -30,11 +30,7 @@ public:
 	void load_program(const std::array<instruction_t, MAX_NUM_INSTRUCTIONS>& program);
 	void run();
 
-	CHIP_8()
-	{
-		load_fonts(FONT_DATA_START_LOCATION, FONT_DATA);
-	}
-
+	CHIP_8();
 private:
 	std::array<byte, MEMORY_SIZE> memory;
 	std::array<byte, NUM_REGISTERS> registers;

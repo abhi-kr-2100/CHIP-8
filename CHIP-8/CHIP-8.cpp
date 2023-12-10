@@ -2,6 +2,14 @@
 
 #include "CHIP-8.hpp"
 
+CHIP_8::CHIP_8()
+	: memory{}, registers{}, stack{}, frame_buffer{},
+	  pc{PROGRAM_DATA_START_LOCATION}, index_register{}, stack_pointer{},
+	  delay_timer{}, sound_timer{}
+{
+	load_fonts(FONT_DATA_START_LOCATION, FONT_DATA);
+}
+
 void CHIP_8::load_program(const std::array<instruction_t, MAX_NUM_INSTRUCTIONS>& program)
 {
 	for (size_t i = 0; i < MAX_NUM_INSTRUCTIONS; ++i)
