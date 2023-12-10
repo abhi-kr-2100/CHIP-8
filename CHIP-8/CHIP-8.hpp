@@ -11,7 +11,7 @@ using instruction_t = double_byte;
 
 constexpr auto MEMORY_SIZE = 4096 /* bytes */;
 constexpr auto STACK_SIZE = 32 /* bytes */;
-constexpr auto STACK_POINTER_SIZE = 2 /* bytes */;
+constexpr auto STACK_ENTRY_SIZE = 2 /* bytes */;
 
 constexpr auto NUM_REGISTERS = 16;
 
@@ -38,7 +38,7 @@ public:
 private:
 	std::array<byte, MEMORY_SIZE> memory;
 	std::array<byte, NUM_REGISTERS> registers;
-	std::array<double_byte, STACK_SIZE / STACK_POINTER_SIZE> stack;
+	std::array<double_byte, STACK_SIZE / STACK_ENTRY_SIZE> stack;
 
 	std::array<std::array<bool, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH> frame_buffer;
 
