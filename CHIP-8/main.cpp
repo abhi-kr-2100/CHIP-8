@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <array>
+#include <vector>
 
 #include "CHIP-8.hpp"
 
@@ -8,6 +9,8 @@ using std::cerr;
 using std::cin;
 using std::ifstream;
 using std::array;
+using std::ios;
+using std::vector;
 
 int main(int argc, char* argv[])
 {
@@ -17,12 +20,22 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	ifstream file{ argv[1] };
-	array<instruction_t, MAX_NUM_INSTRUCTIONS> program{};
-
-	for (size_t i = 0; i < MAX_NUM_INSTRUCTIONS && !file.eof(); ++i)
+	ifstream file{ argv[1], ios::binary };
+	vector<unsigned char> bytes;
+	for (unsigned char byte = 0; (byte = file.get()), file.good(); bytes.push_back(byte))
 	{
-		file >> program[i];
+	}
+
+	array<instruction_t, MAX_NUM_INSTRUCTIONS> program{};
+	for (size_t i = 0, j = 0, sz = bytes.size(); i < sz; i += INSTRUCTION_SIZE, ++j)
+	{
+		instruction_t combined = bytes[i];
+		for (size_t j = 1; j < INSTRUCTION_SIZE; ++j)
+		{
+			combined = combined << sizeof(byte) | bytes[i + j];
+		}
+
+		program[j] = combined;
 	}
 
 	CHIP_8 machine;
