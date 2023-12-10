@@ -28,9 +28,43 @@ void CHIP_8::load_program(const std::array<instruction_t, MAX_NUM_INSTRUCTIONS>&
 	}
 }
 
+/**
+ * A CHIP-8 instruction is 2 bytes long. The first half-byte ("nibble") of the opcode
+ * is the category of the instruction. The interpretation of the rest of the nibbles
+ * depends on the opcode.
+ * 
+ * The various interpretations of the other nibbles are as follows:
+ * - X: (the 2nd nibble): used to look up one of the 16 registers.
+ * - Y: (the 3rd nibble): also used to look up one of the 16 registers.
+ * - N: (the 4th nibble): a 4-bit number.
+ * - NN: (the 2nd byte): an 8-bit number.
+ * - NNN: (the 2nd, 3rd, and the 4th nibble): a 12-bit immediate memory address.
+ */
 void CHIP_8::run()
 {
-	/* TODO */
+	assert(pc < MEMORY_SIZE);
+	const instruction_t curr_instruction = memory[pc] << (sizeof(byte) * BITS_PER_BYTE) | memory[pc + 1];
+	pc += 2;
+
+	if (curr_instruction == 0)
+	{
+		return;
+	}
+
+	const byte category = curr_instruction >> (BITS_PER_NIBBLE * 3);
+
+	// although the nibble/s required depends on the particular opcode, we decode
+	// everything at one place for simplicity
+	const byte X = (curr_instruction >> (BITS_PER_NIBBLE * 2)) & 0xF;
+	const byte Y = (curr_instruction >> BITS_PER_NIBBLE) & 0xF;
+	const byte N = curr_instruction & 0xF;
+	const byte NN = curr_instruction & 0xFF;
+	const double_byte NNN = curr_instruction & 0xFFF;
+
+	assert(executors.find(category) != executors.end());
+	executors[category](X, Y, N, NN, NNN);
+
+	run();
 }
 
 void CHIP_8::load_fonts(double_byte start_location, const decltype(FONT_DATA)& font_data)
