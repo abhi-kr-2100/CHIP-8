@@ -1,6 +1,7 @@
 #include <cassert>
 
 #include "CHIP-8.hpp"
+#include "executors-data.hpp"
 
 CHIP_8::CHIP_8()
 	: memory{}, registers{}, stack{}, frame_buffer{},
@@ -8,6 +9,13 @@ CHIP_8::CHIP_8()
 	  delay_timer{}, sound_timer{}
 {
 	load_fonts(FONT_DATA_START_LOCATION, FONT_DATA);
+	
+	executors[0x0] = clear_screen;
+	executors[0x1] = jump;
+	executors[0x6] = set_register;
+	executors[0x7] = add;
+	executors[0xA] = set_index_register;
+	executors[0xD] = draw;
 }
 
 void CHIP_8::load_program(const std::array<instruction_t, MAX_NUM_INSTRUCTIONS>& program)

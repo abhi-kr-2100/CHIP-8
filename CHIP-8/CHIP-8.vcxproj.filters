@@ -21,12 +21,18 @@
     <ClInclude Include="font-data.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="executors-data.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CHIP-8.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="executors-data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
