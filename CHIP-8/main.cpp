@@ -20,9 +20,9 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	ifstream file{ argv[1], ios::binary };
+	ifstream rom{ argv[1], ios::binary };
 	vector<unsigned char> bytes;
-	for (unsigned char byte = 0; (byte = file.get()), file.good(); bytes.push_back(byte))
+	for (int byte = 0; (byte = rom.get()), !rom.eof(); bytes.push_back(byte))
 	{
 	}
 
