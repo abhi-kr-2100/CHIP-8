@@ -7,8 +7,6 @@
 
 #include "font-data.hpp"
 
-// a nibble is technically half-a-byte, but we use a byte since memory is not nibble-addressable
-using nibble = std::uint8_t;	
 using byte = std::uint8_t;
 using double_byte = std::uint16_t;
 using instruction_t = double_byte;
@@ -51,7 +49,7 @@ private:
 	byte delay_timer;
 	byte sound_timer;
 
-	std::map<nibble, std::function<void(nibble, nibble, nibble, byte, double_byte)>>
+	std::map<byte, std::function<void(byte, byte, byte, byte, double_byte)>>
 		executors;
 
 	void load_fonts(double_byte start_location, const decltype(FONT_DATA)& font_data);
