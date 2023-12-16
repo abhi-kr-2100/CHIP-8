@@ -34,7 +34,7 @@ void add(byte X, byte Y, byte N, byte NN, double_byte NNN, CHIP_8& machine)
 
 void set_index_register(byte X, byte Y, byte N, byte NN, double_byte NNN, CHIP_8& machine)
 {
-	cout << "set_index_register called.\n";
+	machine.set_index_register(NNN);
 }
 
 void draw(byte X, byte Y, byte N, byte NN, double_byte NNN, CHIP_8& machine)

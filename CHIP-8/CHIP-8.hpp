@@ -30,6 +30,9 @@ public:
 	size_t get_num_registers() const;
 	void set_register(size_t register_, byte value);
 	byte get_register(size_t register_) const;
+
+	double_byte get_index_register() const;
+	void set_index_register(double_byte val);
 private:
 	std::array<byte, MEMORY_SIZE> memory;
 	std::array<byte, NUM_REGISTERS> registers;

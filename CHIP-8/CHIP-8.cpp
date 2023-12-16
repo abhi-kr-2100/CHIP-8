@@ -146,3 +146,13 @@ void CHIP_8::set_register(size_t register_, byte value)
 	assert(register_ < get_num_registers());
 	registers[register_] = value;
 }
+
+double_byte CHIP_8::get_index_register() const
+{
+	return index_register;
+}
+
+void CHIP_8::set_index_register(double_byte val)
+{
+	index_register = val;
+}
