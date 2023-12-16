@@ -2,6 +2,7 @@
 
 #include "CHIP-8.hpp"
 #include "executors-data.hpp"
+#include "helpers.hpp"
 
 CHIP_8::CHIP_8()
 	: memory{}, registers{}, stack{}, frame_buffer{},
