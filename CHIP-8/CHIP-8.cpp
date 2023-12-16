@@ -4,6 +4,7 @@
 #include "helpers.hpp"
 
 CHIP_8::CHIP_8()
+	: pc{PROGRAM_DATA_START_LOCATION}
 {
 	for (auto& m : memory)
 	{
