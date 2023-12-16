@@ -63,7 +63,7 @@ void CHIP_8::run()
 	const double_byte NNN = get_nibbles_in_range(curr_instruction, 1, 3);
 
 	assert(executors.find(category) != executors.end());
-	executors[category](X, Y, N, NN, NNN);
+	executors[category](X, Y, N, NN, NNN, *this);
 
 	run();
 }

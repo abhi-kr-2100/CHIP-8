@@ -30,7 +30,7 @@ private:
 	byte delay_timer;
 	byte sound_timer;
 
-	std::map<byte, std::function<void(byte, byte, byte, byte, double_byte)>>
+	std::map<byte, std::function<void(byte, byte, byte, byte, double_byte, CHIP_8&)>>
 		executors;
 
 	void load_fonts(double_byte start_location, const decltype(FONT_DATA)& font_data);
