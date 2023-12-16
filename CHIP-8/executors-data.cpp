@@ -17,7 +17,7 @@ void clear_screen(byte X, byte Y, byte N, byte NN, double_byte NNN, CHIP_8& mach
 
 void jump(byte X, byte Y, byte N, byte NN, double_byte NNN, CHIP_8& machine)
 {
-	cout << "jump called.\n";
+	machine.set_pc(NNN);
 }
 
 void set_register(byte X, byte Y, byte N, byte NN, double_byte NNN, CHIP_8& machine)

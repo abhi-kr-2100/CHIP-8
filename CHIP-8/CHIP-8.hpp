@@ -23,6 +23,9 @@ public:
 
 	size_t get_framebuffer_width() const;
 	size_t get_framebuffer_height() const;
+
+	double_byte get_pc() const;
+	void set_pc(double_byte address);
 private:
 	std::array<byte, MEMORY_SIZE> memory;
 	std::array<byte, NUM_REGISTERS> registers;

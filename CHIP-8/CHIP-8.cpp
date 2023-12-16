@@ -118,3 +118,14 @@ bool CHIP_8::get_framebuffer_pixel(size_t x, size_t y) const
 
 	return frame_buffer[x][y];
 }
+
+double_byte CHIP_8::get_pc() const
+{
+	return pc;
+}
+
+void CHIP_8::set_pc(double_byte address)
+{
+	assert(address < MEMORY_SIZE);
+	pc = address;
+}
