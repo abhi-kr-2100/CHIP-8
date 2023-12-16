@@ -6,7 +6,13 @@ using std::cout;
 
 void clear_screen(byte X, byte Y, byte N, byte NN, double_byte NNN, CHIP_8& machine)
 {
-	cout << "clear_screen called.\n";
+	for (size_t i = 0; i < FRAME_BUFFER_WIDTH; ++i)
+	{
+		for (size_t j = 0; j < FRAME_BUFFER_HEIGHT; ++j)
+		{
+			machine.unset_framebuffer_pixel(i, j);
+		}
+	}
 }
 
 void jump(byte X, byte Y, byte N, byte NN, double_byte NNN, CHIP_8& machine)
