@@ -5,6 +5,8 @@
 #include <functional>
 #include <map>
 
+#include <ftxui/screen/screen.hpp>
+
 #include "data-types.hpp"
 #include "font-data.hpp"
 #include "machine-specs.hpp"
@@ -18,6 +20,7 @@ public:
 	CHIP_8();
 
 	bool get_frame_buffer_pixel(size_t x, size_t y);
+	void set_frame_buffer_pixel(size_t x, size_t y, bool val);
 
 	// machine instructions
 	void clear_screen(byte, byte, byte, byte, double_byte);
@@ -31,7 +34,7 @@ private:
 	std::array<byte, NUM_REGISTERS> registers;
 	std::array<double_byte, STACK_SIZE / STACK_ENTRY_SIZE> stack;
 
-	std::array<std::array<bool, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH> frame_buffer;
+	ftxui::Screen frame_buffer;
 
 	double_byte pc;
 	double_byte index_register;

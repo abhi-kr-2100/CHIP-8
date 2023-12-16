@@ -1,10 +1,15 @@
 #include <cassert>
 
+#include <ftxui/screen/screen.hpp>
+
 #include "CHIP-8.hpp"
 #include "helpers.hpp"
 
+using ftxui::Screen;
+using ftxui::Dimension::Fixed;
+
 CHIP_8::CHIP_8()
-	: pc{PROGRAM_DATA_START_LOCATION}
+	: pc{PROGRAM_DATA_START_LOCATION}, frame_buffer{Screen::Create(Fixed(FRAME_BUFFER_WIDTH), Fixed(FRAME_BUFFER_HEIGHT))}
 {
 	for (auto& m : memory)
 	{
@@ -18,11 +23,11 @@ CHIP_8::CHIP_8()
 	{
 		s = 0;
 	}
-	for (auto& r : frame_buffer)
+	for (size_t x = 0; x < FRAME_BUFFER_WIDTH; ++x)
 	{
-		for (auto& c : r)
+		for (size_t y = 0; y < FRAME_BUFFER_HEIGHT; ++y)
 		{
-			c = 0;
+			set_frame_buffer_pixel(x, y, false);
 		}
 	}
 
@@ -103,11 +108,11 @@ void CHIP_8::load_fonts(double_byte start_location, const decltype(FONT_DATA)& f
 
 void CHIP_8::clear_screen(byte, byte, byte, byte NN, double_byte)
 {
-	for (size_t x = 0, width = frame_buffer.size(); x < width; ++x)
+	for (size_t x = 0, width = FRAME_BUFFER_WIDTH; x < width; ++x)
 	{
-		for (size_t y = 0, height = frame_buffer[x].size(); y < height; ++y)
+		for (size_t y = 0, height = FRAME_BUFFER_HEIGHT; y < height; ++y)
 		{
-			frame_buffer[x][y] = false;
+			set_frame_buffer_pixel(x, y, false);
 		}
 	}
 }
@@ -137,8 +142,8 @@ void CHIP_8::set_index_register(byte, byte, byte, byte NN, double_byte NNN)
 
 void CHIP_8::draw(byte X, byte Y, byte N, byte NN, double_byte)
 {
-	assert(X + N < frame_buffer.size());
-	assert(Y + BITS_PER_BYTE < frame_buffer[0].size());
+	assert(X + N < FRAME_BUFFER_WIDTH);
+	assert(Y + BITS_PER_BYTE < FRAME_BUFFER_HEIGHT);
 
 	registers[0xf] = 0;
 	for (size_t i = 0; i < N; ++i)
@@ -150,22 +155,31 @@ void CHIP_8::draw(byte X, byte Y, byte N, byte NN, double_byte)
 			const auto bit = bits & (1 << (BITS_PER_BYTE - j - 1));
 			if (bit)
 			{
-				frame_buffer[X + i][Y + j] = true;
+				set_frame_buffer_pixel(X + i, Y + j, true);
 				continue;
 			}
-			if (frame_buffer[X + i][Y + j])
+			if (get_frame_buffer_pixel(X + i, Y + j))
 			{
 				registers[0xf] = 1;
 			}
-			frame_buffer[X + i][Y + j] = false;
+			set_frame_buffer_pixel(X + i, Y + j, false);
 		}
 	}
 }
 
 bool CHIP_8::get_frame_buffer_pixel(size_t x, size_t y)
 {
-	assert(x < frame_buffer.size());
-	assert(y < frame_buffer[0].size());
+	assert(x < FRAME_BUFFER_WIDTH);
+	assert(y < FRAME_BUFFER_HEIGHT);
 
-	return frame_buffer[x][y];
+	return frame_buffer.at(x, y) == "*";
+}
+
+void CHIP_8::set_frame_buffer_pixel(size_t x, size_t y, bool val)
+{
+	assert(x < FRAME_BUFFER_WIDTH);
+	assert(y < FRAME_BUFFER_HEIGHT);
+
+	frame_buffer.at(x, y) = val ? "*" : " ";
+	frame_buffer.Print();
 }
