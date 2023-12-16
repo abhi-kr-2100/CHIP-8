@@ -27,7 +27,9 @@ void set_register(byte X, byte Y, byte N, byte NN, double_byte NNN, CHIP_8& mach
 
 void add(byte X, byte Y, byte N, byte NN, double_byte NNN, CHIP_8& machine)
 {
-	cout << "add called.\n";
+	const auto old_value = machine.get_register(X);
+	const auto new_value = old_value + NN;
+	machine.set_register(X, new_value);
 }
 
 void set_index_register(byte X, byte Y, byte N, byte NN, double_byte NNN, CHIP_8& machine)
