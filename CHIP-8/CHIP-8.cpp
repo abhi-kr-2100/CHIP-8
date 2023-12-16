@@ -129,7 +129,7 @@ void CHIP_8::draw(byte X, byte Y, byte N, byte NN, double_byte)
 		const auto bits = memory[index_register + i];
 		for (size_t j = 0; j < BITS_PER_BYTE; ++j)
 		{
-			const auto bit = bits & (1 << BITS_PER_BYTE - j - 1);
+			const auto bit = bits & (1 << (BITS_PER_BYTE - j - 1));
 			if (bit)
 			{
 				frame_buffer[X + i][Y + j] = true;
