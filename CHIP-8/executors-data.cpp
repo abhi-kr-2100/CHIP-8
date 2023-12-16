@@ -22,7 +22,7 @@ void jump(byte X, byte Y, byte N, byte NN, double_byte NNN, CHIP_8& machine)
 
 void set_register(byte X, byte Y, byte N, byte NN, double_byte NNN, CHIP_8& machine)
 {
-	cout << "set_register called.\n";
+	machine.set_register(X, NN);
 }
 
 void add(byte X, byte Y, byte N, byte NN, double_byte NNN, CHIP_8& machine)

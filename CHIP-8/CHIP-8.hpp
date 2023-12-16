@@ -26,6 +26,10 @@ public:
 
 	double_byte get_pc() const;
 	void set_pc(double_byte address);
+
+	size_t get_num_registers() const;
+	void set_register(size_t register_, byte value);
+	byte get_register(size_t register_) const;
 private:
 	std::array<byte, MEMORY_SIZE> memory;
 	std::array<byte, NUM_REGISTERS> registers;

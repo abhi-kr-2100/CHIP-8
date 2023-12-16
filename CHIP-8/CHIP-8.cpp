@@ -129,3 +129,20 @@ void CHIP_8::set_pc(double_byte address)
 	assert(address < MEMORY_SIZE);
 	pc = address;
 }
+
+size_t CHIP_8::get_num_registers() const
+{
+	return registers.size();
+}
+
+byte CHIP_8::get_register(size_t register_) const
+{
+	assert(register_ < get_num_registers());
+	return registers[register_];
+}
+
+void CHIP_8::set_register(size_t register_, byte value)
+{
+	assert(register_ < get_num_registers());
+	registers[register_] = value;
+}
