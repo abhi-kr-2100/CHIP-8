@@ -20,6 +20,9 @@ public:
 	void set_framebuffer_pixel(size_t x, size_t y);
 	void unset_framebuffer_pixel(size_t x, size_t y);
 	bool get_framebuffer_pixel(size_t x, size_t y) const;
+
+	size_t get_framebuffer_width() const;
+	size_t get_framebuffer_height() const;
 private:
 	std::array<byte, MEMORY_SIZE> memory;
 	std::array<byte, NUM_REGISTERS> registers;

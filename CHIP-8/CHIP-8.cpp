@@ -84,26 +84,37 @@ void CHIP_8::load_fonts(double_byte start_location, const decltype(FONT_DATA)& f
 	}
 }
 
+size_t CHIP_8::get_framebuffer_width() const
+{
+	return frame_buffer.size();
+}
+
+size_t CHIP_8::get_framebuffer_height() const
+{
+	assert(frame_buffer.size() != 0);
+	return frame_buffer[0].size();
+}
+
 void CHIP_8::set_framebuffer_pixel(size_t x, size_t y)
 {
-	assert(x < FRAME_BUFFER_WIDTH);
-	assert(y < FRAME_BUFFER_HEIGHT);
+	assert(x < get_framebuffer_width());
+	assert(y < get_framebuffer_height());
 
 	frame_buffer[x][y] = true;
 }
 
 void CHIP_8::unset_framebuffer_pixel(size_t x, size_t y)
 {
-	assert(x < FRAME_BUFFER_WIDTH);
-	assert(y < FRAME_BUFFER_HEIGHT);
+	assert(x < get_framebuffer_width());
+	assert(y < get_framebuffer_height());
 
 	frame_buffer[x][y] = false;
 }
 
 bool CHIP_8::get_framebuffer_pixel(size_t x, size_t y) const
 {
-	assert(x < FRAME_BUFFER_WIDTH);
-	assert(y < FRAME_BUFFER_HEIGHT);
+	assert(x < get_framebuffer_width());
+	assert(y < get_framebuffer_height());
 
 	return frame_buffer[x][y];
 }
