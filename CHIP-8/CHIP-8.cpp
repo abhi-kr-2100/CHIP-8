@@ -4,10 +4,27 @@
 #include "helpers.hpp"
 
 CHIP_8::CHIP_8()
-	: memory{}, registers{}, stack{}, frame_buffer{},
-	  pc{PROGRAM_DATA_START_LOCATION}, index_register{}, stack_pointer{},
-	  delay_timer{}, sound_timer{}
 {
+	for (auto& m : memory)
+	{
+		m = 0;
+	}
+	for (auto& r : registers)
+	{
+		r = 0;
+	}
+	for (auto& s : stack)
+	{
+		s = 0;
+	}
+	for (auto& r : frame_buffer)
+	{
+		for (auto& c : r)
+		{
+			c = 0;
+		}
+	}
+
 	load_fonts(FONT_DATA_START_LOCATION, FONT_DATA);
 
 	executors[0x0] = &CHIP_8::clear_screen;
