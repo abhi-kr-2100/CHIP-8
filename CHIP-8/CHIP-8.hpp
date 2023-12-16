@@ -16,6 +16,10 @@ public:
 	void run();
 
 	CHIP_8();
+
+	void set_framebuffer_pixel(size_t x, size_t y);
+	void unset_framebuffer_pixel(size_t x, size_t y);
+	bool get_framebuffer_pixel(size_t x, size_t y) const;
 private:
 	std::array<byte, MEMORY_SIZE> memory;
 	std::array<byte, NUM_REGISTERS> registers;
