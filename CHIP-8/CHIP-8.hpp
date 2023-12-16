@@ -17,6 +17,8 @@ public:
 
 	CHIP_8();
 
+	bool get_frame_buffer_pixel(size_t x, size_t y);
+
 	// machine instructions
 	void clear_screen(byte, byte, byte, byte, double_byte);
 	void jump(byte, byte, byte, byte, double_byte NNN);

@@ -160,3 +160,11 @@ void CHIP_8::draw(byte X, byte Y, byte N, byte NN, double_byte)
 		}
 	}
 }
+
+bool CHIP_8::get_frame_buffer_pixel(size_t x, size_t y)
+{
+	assert(x < frame_buffer.size());
+	assert(y < frame_buffer[0].size());
+
+	return frame_buffer[x][y];
+}
