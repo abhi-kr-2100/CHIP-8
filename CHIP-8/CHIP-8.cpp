@@ -52,15 +52,15 @@ void CHIP_8::run()
 		return;
 	}
 
-	const byte category = curr_instruction >> (BITS_PER_NIBBLE * 3);
+	const byte category = get_nibbles_in_range(curr_instruction, 0, 0);
 
 	// although the nibble/s required depends on the particular opcode, we decode
 	// everything at one place for simplicity
-	const byte X = (curr_instruction >> (BITS_PER_NIBBLE * 2)) & 0xF;
-	const byte Y = (curr_instruction >> BITS_PER_NIBBLE) & 0xF;
-	const byte N = curr_instruction & 0xF;
-	const byte NN = curr_instruction & 0xFF;
-	const double_byte NNN = curr_instruction & 0xFFF;
+	const byte X = get_nibbles_in_range(curr_instruction, 1, 1);
+	const byte Y = get_nibbles_in_range(curr_instruction, 2, 2);
+	const byte N = get_nibbles_in_range(curr_instruction, 3, 3);
+	const byte NN = get_nibbles_in_range(curr_instruction, 2, 3);
+	const double_byte NNN = get_nibbles_in_range(curr_instruction, 1, 3);
 
 	assert(executors.find(category) != executors.end());
 	executors[category](X, Y, N, NN, NNN);
