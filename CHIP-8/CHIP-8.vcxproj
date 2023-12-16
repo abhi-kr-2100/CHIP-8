@@ -129,7 +129,6 @@
   <ItemGroup>
     <ClInclude Include="CHIP-8.hpp" />
     <ClInclude Include="font-data.hpp" />
-    <ClInclude Include="executors-data.hpp" />
     <ClInclude Include="data-types.hpp" />
     <ClInclude Include="helpers.hpp" />
     <ClInclude Include="machine-specs.hpp" />
@@ -137,7 +136,6 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="CHIP-8.cpp" />
-    <ClCompile Include="executors-data.cpp" />
     <ClCompile Include="helpers.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

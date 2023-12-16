@@ -17,22 +17,13 @@ public:
 
 	CHIP_8();
 
-	void set_framebuffer_pixel(size_t x, size_t y);
-	void unset_framebuffer_pixel(size_t x, size_t y);
-	bool get_framebuffer_pixel(size_t x, size_t y) const;
-
-	size_t get_framebuffer_width() const;
-	size_t get_framebuffer_height() const;
-
-	double_byte get_pc() const;
-	void set_pc(double_byte address);
-
-	size_t get_num_registers() const;
-	void set_register(size_t register_, byte value);
-	byte get_register(size_t register_) const;
-
-	double_byte get_index_register() const;
-	void set_index_register(double_byte val);
+	// machine instructions
+	void clear_screen(byte, byte, byte, byte, double_byte);
+	void jump(byte, byte, byte, byte, double_byte NNN);
+	void set_register(byte X, byte, byte, byte NN, double_byte);
+	void add(byte X, byte, byte, byte NN, double_byte);
+	void set_index_register(byte, byte, byte, byte, double_byte NNN);
+	void draw(byte X, byte Y, byte N, byte, double_byte);
 private:
 	std::array<byte, MEMORY_SIZE> memory;
 	std::array<byte, NUM_REGISTERS> registers;
@@ -47,8 +38,7 @@ private:
 	byte delay_timer;
 	byte sound_timer;
 
-	std::map<byte, std::function<void(byte, byte, byte, byte, double_byte, CHIP_8&)>>
-		executors;
+	std::map<byte, void(CHIP_8::*)(byte, byte, byte, byte, double_byte)> executors;
 
 	void load_fonts(double_byte start_location, const decltype(FONT_DATA)& font_data);
 };

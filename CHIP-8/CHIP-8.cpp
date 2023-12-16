@@ -1,7 +1,6 @@
 #include <cassert>
 
 #include "CHIP-8.hpp"
-#include "executors-data.hpp"
 #include "helpers.hpp"
 
 CHIP_8::CHIP_8()
@@ -10,13 +9,13 @@ CHIP_8::CHIP_8()
 	  delay_timer{}, sound_timer{}
 {
 	load_fonts(FONT_DATA_START_LOCATION, FONT_DATA);
-	
-	executors[0x0] = clear_screen;
-	executors[0x1] = jump;
-	executors[0x6] = set_register;
-	executors[0x7] = add;
-	executors[0xA] = set_index_register;
-	executors[0xD] = draw;
+
+	executors[0x0] = &CHIP_8::clear_screen;
+	executors[0x1] = &CHIP_8::jump;
+	executors[0x6] = &CHIP_8::set_register;
+	executors[0x7] = &CHIP_8::add;
+	executors[0xA] = &CHIP_8::set_index_register;
+	executors[0xD] = &CHIP_8::draw;
 }
 
 void CHIP_8::load_program(const std::array<instruction_t, MAX_NUM_INSTRUCTIONS>& program)
@@ -63,7 +62,7 @@ void CHIP_8::run()
 	const double_byte NNN = get_nibbles_in_range(curr_instruction, 1, 3);
 
 	assert(executors.find(category) != executors.end());
-	executors[category](X, Y, N, NN, NNN, *this);
+	(this->*executors[category])(X, Y, N, NN, NNN);
 
 	run();
 }
@@ -84,75 +83,63 @@ void CHIP_8::load_fonts(double_byte start_location, const decltype(FONT_DATA)& f
 	}
 }
 
-size_t CHIP_8::get_framebuffer_width() const
+void CHIP_8::clear_screen(byte, byte, byte, byte NN, double_byte)
 {
-	return frame_buffer.size();
+	for (size_t x = 0, width = frame_buffer.size(); x < width; ++x)
+	{
+		for (size_t y = 0, height = frame_buffer[x].size(); y < height; ++y)
+		{
+			frame_buffer[x][y] = false;
+		}
+	}
 }
 
-size_t CHIP_8::get_framebuffer_height() const
+void CHIP_8::jump(byte, byte, byte, byte N, double_byte NNN)
 {
-	assert(frame_buffer.size() != 0);
-	return frame_buffer[0].size();
+	assert(NNN < memory.size());
+	pc = NNN;
 }
 
-void CHIP_8::set_framebuffer_pixel(size_t x, size_t y)
+void CHIP_8::set_register(byte X, byte, byte N, byte NN, double_byte)
 {
-	assert(x < get_framebuffer_width());
-	assert(y < get_framebuffer_height());
-
-	frame_buffer[x][y] = true;
+	assert(X < registers.size());
+	registers[X] = NN;
 }
 
-void CHIP_8::unset_framebuffer_pixel(size_t x, size_t y)
+void CHIP_8::add(byte X, byte, byte N, byte NN, double_byte)
 {
-	assert(x < get_framebuffer_width());
-	assert(y < get_framebuffer_height());
-
-	frame_buffer[x][y] = false;
+	assert(X < registers.size());
+	registers[X] += NN;
 }
 
-bool CHIP_8::get_framebuffer_pixel(size_t x, size_t y) const
+void CHIP_8::set_index_register(byte, byte, byte, byte NN, double_byte NNN)
 {
-	assert(x < get_framebuffer_width());
-	assert(y < get_framebuffer_height());
-
-	return frame_buffer[x][y];
+	index_register = NNN;
 }
 
-double_byte CHIP_8::get_pc() const
+void CHIP_8::draw(byte X, byte Y, byte N, byte NN, double_byte)
 {
-	return pc;
-}
+	assert(X + N < frame_buffer.size());
+	assert(Y + BITS_PER_BYTE < frame_buffer[0].size());
 
-void CHIP_8::set_pc(double_byte address)
-{
-	assert(address < MEMORY_SIZE);
-	pc = address;
-}
-
-size_t CHIP_8::get_num_registers() const
-{
-	return registers.size();
-}
-
-byte CHIP_8::get_register(size_t register_) const
-{
-	assert(register_ < get_num_registers());
-	return registers[register_];
-}
-
-void CHIP_8::set_register(size_t register_, byte value)
-{
-	assert(register_ < get_num_registers());
-	registers[register_] = value;
-}
-
-double_byte CHIP_8::get_index_register() const
-{
-	return index_register;
-}
-
-void CHIP_8::set_index_register(double_byte val)
-{
-	index_register = val;
+	registers[0xf] = 0;
+	for (size_t i = 0; i < N; ++i)
+	{
+		assert(index_register + i < memory.size());
+		const auto bits = memory[index_register + i];
+		for (size_t j = 0; j < BITS_PER_BYTE; ++j)
+		{
+			const auto bit = bits & (1 << BITS_PER_BYTE - j - 1);
+			if (bit)
+			{
+				frame_buffer[X + i][Y + j] = true;
+				continue;
+			}
+			if (frame_buffer[X + i][Y + j])
+			{
+				registers[0xf] = 1;
+			}
+			frame_buffer[X + i][Y + j] = false;
+		}
+	}
 }

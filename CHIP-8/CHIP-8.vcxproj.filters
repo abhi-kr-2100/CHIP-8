@@ -21,9 +21,6 @@
     <ClInclude Include="font-data.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="executors-data.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="data-types.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -39,9 +36,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CHIP-8.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="executors-data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="helpers.cpp">
