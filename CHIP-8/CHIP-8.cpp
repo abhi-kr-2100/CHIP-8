@@ -144,8 +144,14 @@ void CHIP_8::set_index_register(byte, byte, byte, byte NN, double_byte NNN)
 
 void CHIP_8::draw(byte X, byte Y, byte N, byte NN, double_byte)
 {
-	assert(X + N < FRAME_BUFFER_WIDTH);
-	assert(Y + BITS_PER_BYTE < FRAME_BUFFER_HEIGHT);
+	assert(X < registers.size());
+	assert(Y < registers.size());
+
+	const auto x = registers[X];
+	const auto y = registers[Y];
+
+	assert(x + BITS_PER_BYTE < FRAME_BUFFER_WIDTH);
+	assert(y + N < FRAME_BUFFER_HEIGHT);
 
 	registers[0xf] = 0;
 	for (size_t i = 0; i < N; ++i)
@@ -157,14 +163,14 @@ void CHIP_8::draw(byte X, byte Y, byte N, byte NN, double_byte)
 			const auto bit = bits & (1 << (BITS_PER_BYTE - j - 1));
 			if (bit)
 			{
-				set_frame_buffer_pixel(X + j, Y + i, true);
+				set_frame_buffer_pixel(x + j, y + i, true);
 				continue;
 			}
-			if (get_frame_buffer_pixel(X + j, Y + i))
+			if (get_frame_buffer_pixel(x + j, y + i))
 			{
 				registers[0xf] = 1;
 			}
-			set_frame_buffer_pixel(X + j, Y + i, false);
+			set_frame_buffer_pixel(x + j, y + i, false);
 		}
 	}
 }
