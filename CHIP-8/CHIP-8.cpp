@@ -155,14 +155,14 @@ void CHIP_8::draw(byte X, byte Y, byte N, byte NN, double_byte)
 			const auto bit = bits & (1 << (BITS_PER_BYTE - j - 1));
 			if (bit)
 			{
-				set_frame_buffer_pixel(X + i, Y + j, true);
+				set_frame_buffer_pixel(X + j, Y + i, true);
 				continue;
 			}
-			if (get_frame_buffer_pixel(X + i, Y + j))
+			if (get_frame_buffer_pixel(X + j, Y + i))
 			{
 				registers[0xf] = 1;
 			}
-			set_frame_buffer_pixel(X + i, Y + j, false);
+			set_frame_buffer_pixel(X + j, Y + i, false);
 		}
 	}
 }
