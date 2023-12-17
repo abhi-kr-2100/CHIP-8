@@ -65,29 +65,31 @@ void CHIP_8::load_program(const std::array<instruction_t, MAX_NUM_INSTRUCTIONS>&
  */
 void CHIP_8::run()
 {
-	assert(pc < MEMORY_SIZE);
-	const instruction_t curr_instruction = memory[pc] << (sizeof(byte) * BITS_PER_BYTE) | memory[pc + 1];
-	pc += 2;
-
-	if (curr_instruction == 0)
+	while (true)
 	{
-		return;
+		assert(pc < MEMORY_SIZE);
+		const instruction_t curr_instruction = memory[pc] << (sizeof(byte) * BITS_PER_BYTE) | memory[pc + 1];
+		pc += 2;
+
+
+		if (curr_instruction == 0)
+		{
+			return;
+		}
+
+		const byte category = get_nibbles_in_range(curr_instruction, 0, 0);
+
+		// although the nibble/s required depends on the particular opcode, we decode
+		// everything at one place for simplicity
+		const byte X = get_nibbles_in_range(curr_instruction, 1, 1);
+		const byte Y = get_nibbles_in_range(curr_instruction, 2, 2);
+		const byte N = get_nibbles_in_range(curr_instruction, 3, 3);
+		const byte NN = get_nibbles_in_range(curr_instruction, 2, 3);
+		const double_byte NNN = get_nibbles_in_range(curr_instruction, 1, 3);
+
+		assert(executors.find(category) != executors.end());
+		(this->*executors[category])(X, Y, N, NN, NNN);
 	}
-
-	const byte category = get_nibbles_in_range(curr_instruction, 0, 0);
-
-	// although the nibble/s required depends on the particular opcode, we decode
-	// everything at one place for simplicity
-	const byte X = get_nibbles_in_range(curr_instruction, 1, 1);
-	const byte Y = get_nibbles_in_range(curr_instruction, 2, 2);
-	const byte N = get_nibbles_in_range(curr_instruction, 3, 3);
-	const byte NN = get_nibbles_in_range(curr_instruction, 2, 3);
-	const double_byte NNN = get_nibbles_in_range(curr_instruction, 1, 3);
-
-	assert(executors.find(category) != executors.end());
-	(this->*executors[category])(X, Y, N, NN, NNN);
-
-	run();
 }
 
 void CHIP_8::load_fonts(double_byte start_location, const decltype(FONT_DATA)& font_data)
