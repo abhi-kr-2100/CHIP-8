@@ -9,6 +9,8 @@
 #include "font-data.hpp"
 #include "machine-specs.hpp"
 
+class Executor;
+
 class CHIP_8
 {
 public:
@@ -18,6 +20,7 @@ public:
 	bool get_pixel_at(size_t x, size_t y) const;
 
 	CHIP_8();
+	~CHIP_8();
 
 	/**
 	 * A CHIP-8 instruction is 2 bytes (or 4 nibbles) long, and can be
@@ -49,24 +52,7 @@ public:
 		Instruction_payload payload;
 	};
 
-	void ins_0(const Instruction::Instruction_payload& payload);
-	void ins_1(const Instruction::Instruction_payload& payload);
-	void ins_2(const Instruction::Instruction_payload& payload);
-	void ins_3(const Instruction::Instruction_payload& payload);
-	void ins_4(const Instruction::Instruction_payload& payload);
-	void ins_5(const Instruction::Instruction_payload& payload);
-	void ins_6(const Instruction::Instruction_payload& payload);
-	void ins_7(const Instruction::Instruction_payload& payload);
-	void ins_8(const Instruction::Instruction_payload& payload);
-	void ins_9(const Instruction::Instruction_payload& payload);
-	void ins_A(const Instruction::Instruction_payload& payload);
-	void ins_B(const Instruction::Instruction_payload& payload);
-	void ins_C(const Instruction::Instruction_payload& payload);
-	void ins_D(const Instruction::Instruction_payload& payload);
-	void ins_E(const Instruction::Instruction_payload& payload);
-	void ins_F(const Instruction::Instruction_payload& payload);
-
-	// named instructions -- helper methods used by the above
+	// named instructions -- to be moved elsewhere
 	void clear_screen();
 	void return_();
 	void jump(double_byte NNN);
@@ -88,8 +74,10 @@ private:
 	byte delay_timer;
 	byte sound_timer;
 
-	std::map<byte, void(CHIP_8::*)(const Instruction::Instruction_payload&)> executors;
-
 	void load_fonts(double_byte start_location, const decltype(FONT_DATA)& font_data);
 	Instruction get_current_instruction() const;
+
+	Executor* executor;
+
+	friend class Executor;
 };
