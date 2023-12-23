@@ -55,13 +55,23 @@ CHIP_8::CHIP_8()
 	executors[0xF] = &CHIP_8::ins_F;
 }
 
-void CHIP_8::load_program(const std::array<instruction_t, MAX_NUM_INSTRUCTIONS>& program)
+void CHIP_8::load_program(const std::array<instruction_t,
+		MAX_NUM_INSTRUCTIONS>& program)
 {
-	for (size_t i = 0, j = 0; i < MAX_NUM_INSTRUCTIONS; ++i, j += 2)
+	for (size_t ins_ctr = 0, mem_ctr = 0; ins_ctr < MAX_NUM_INSTRUCTIONS;
+			++ins_ctr, mem_ctr += INSTRUCTION_SIZE)
 	{
-		assert(i + PROGRAM_DATA_START_LOCATION < MEMORY_SIZE);
-		memory[j + PROGRAM_DATA_START_LOCATION] = program[i] >> (sizeof(byte) * BITS_PER_BYTE);
-		memory[j + 1 + PROGRAM_DATA_START_LOCATION] = program[i] & 0x00FF;
+		for (size_t byte_ctr = 0; byte_ctr < INSTRUCTION_SIZE; ++byte_ctr)
+		{
+			const auto start_nibble = byte_ctr * NIBBLES_PER_BYTE;
+			const auto mem_location = mem_ctr + byte_ctr + \
+				PROGRAM_DATA_START_LOCATION;
+			memory[mem_location] = get_nibbles_in_range(
+				program[ins_ctr],
+				start_nibble,
+				start_nibble + NIBBLES_PER_BYTE - 1
+			);
+		}
 	}
 }
 

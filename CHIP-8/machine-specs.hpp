@@ -2,6 +2,7 @@
 
 constexpr auto BITS_PER_BYTE = 8;
 constexpr auto BITS_PER_NIBBLE = 4;
+constexpr auto NIBBLES_PER_BYTE = BITS_PER_BYTE / BITS_PER_NIBBLE;
 
 constexpr auto MEMORY_SIZE = 4096 /* bytes */;
 constexpr auto STACK_SIZE = 32 /* bytes */;
