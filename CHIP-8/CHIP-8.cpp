@@ -113,7 +113,7 @@ void CHIP_8::load_fonts(double_byte start_location, const decltype(FONT_DATA)& f
 	}
 }
 
-void CHIP_8::ins_0(const Instruction_payload& payload)
+void CHIP_8::ins_0(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	if (payload.X == 0x0 && payload.Y == 0xE && payload.N == 0x0)
 	{
@@ -129,7 +129,7 @@ void CHIP_8::ins_0(const Instruction_payload& payload)
 	}
 }
 
-void CHIP_8::ins_1(const Instruction_payload& payload)
+void CHIP_8::ins_1(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	if (payload.NNN >= memory.size())
 	{
@@ -139,7 +139,7 @@ void CHIP_8::ins_1(const Instruction_payload& payload)
 	jump(payload.NNN);
 }
 
-void CHIP_8::ins_2(const Instruction_payload& payload)
+void CHIP_8::ins_2(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	if (payload.NNN >= memory.size())
 	{
@@ -155,7 +155,7 @@ void CHIP_8::ins_2(const Instruction_payload& payload)
 	jump(payload.NNN);
 }
 
-void CHIP_8::ins_3(const Instruction_payload& payload)
+void CHIP_8::ins_3(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	if (registers[payload.X] == payload.NN)
 	{
@@ -163,7 +163,7 @@ void CHIP_8::ins_3(const Instruction_payload& payload)
 	}
 }
 
-void CHIP_8::ins_4(const Instruction_payload& payload)
+void CHIP_8::ins_4(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	if (registers[payload.X] != payload.NN)
 	{
@@ -171,7 +171,7 @@ void CHIP_8::ins_4(const Instruction_payload& payload)
 	}
 }
 
-void CHIP_8::ins_5(const Instruction_payload& payload)
+void CHIP_8::ins_5(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	if (payload.N != 0)
 	{
@@ -184,17 +184,17 @@ void CHIP_8::ins_5(const Instruction_payload& payload)
 	}
 }
 
-void CHIP_8::ins_6(const Instruction_payload& payload)
+void CHIP_8::ins_6(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	set_register(payload.X, payload.NN);
 }
 
-void CHIP_8::ins_7(const Instruction_payload& payload)
+void CHIP_8::ins_7(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	add(payload.X, payload.NN);
 }
 
-void CHIP_8::ins_8(const Instruction_payload& payload)
+void CHIP_8::ins_8(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	switch (payload.N)
 	{
@@ -250,7 +250,7 @@ void CHIP_8::ins_8(const Instruction_payload& payload)
 	}
 }
 
-void CHIP_8::ins_9(const Instruction_payload& payload)
+void CHIP_8::ins_9(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	if (payload.N != 0)
 	{
@@ -263,33 +263,33 @@ void CHIP_8::ins_9(const Instruction_payload& payload)
 	}
 }
 
-void CHIP_8::ins_A(const Instruction_payload& payload)
+void CHIP_8::ins_A(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	set_index_register(payload.NNN);
 }
 
-void CHIP_8::ins_B(const Instruction_payload& payload)
+void CHIP_8::ins_B(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	jump(registers[0] + payload.NNN);
 }
 
-void CHIP_8::ins_C(const Instruction_payload& payload)
+void CHIP_8::ins_C(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	const auto random = rand() % (int)pow(2, BITS_PER_BYTE);
 	set_register(payload.X, random & payload.NN);
 }
 
-void CHIP_8::ins_D(const Instruction_payload& payload)
+void CHIP_8::ins_D(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	draw(payload.X, payload.Y, payload.N);
 }
 
-void CHIP_8::ins_E(const Instruction_payload& payload)
+void CHIP_8::ins_E(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	throw exception("Not implemented.");
 }
 
-void CHIP_8::ins_F(const Instruction_payload& payload)
+void CHIP_8::ins_F(const CHIP_8::Instruction::Instruction_payload& payload)
 {
 	switch (payload.NN)
 	{
@@ -421,7 +421,7 @@ void CHIP_8::draw(byte X, byte Y, byte N)
 	}
 }
 
-Instruction CHIP_8::get_current_instruction() const
+CHIP_8::Instruction CHIP_8::get_current_instruction() const
 {
 	// A CHIP-8 insturction is 2 bytes long; hence `pc + 1`.
 	if (pc + 1 >= memory.size())
