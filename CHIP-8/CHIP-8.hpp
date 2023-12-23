@@ -22,13 +22,43 @@ public:
 	bool get_frame_buffer_pixel(size_t x, size_t y);
 	void set_frame_buffer_pixel(size_t x, size_t y, bool val);
 
-	// machine instructions
-	void clear_screen(byte, byte, byte, byte, double_byte);
-	void jump(byte, byte, byte, byte, double_byte NNN);
-	void set_register(byte X, byte, byte, byte NN, double_byte);
-	void add(byte X, byte, byte, byte NN, double_byte);
-	void set_index_register(byte, byte, byte, byte, double_byte NNN);
-	void draw(byte X, byte Y, byte N, byte, double_byte);
+	// CHIP-8 op codes are two bytes (or 4 nibbles). The category of the op code
+	// is determined by the first nibble, while the remaining 3 nibbles may be
+	// grouped in various ways depending on the particular instruction.
+	// We dedicate one method each to each category of op code. We group the
+	// remaining nibbles in the following way:
+	// If 0xABCD is the opcode, A, the first nibble, is the category.
+	// B is the second nibble (stored in a byte since byte is the smallest
+	// addressable unit).
+	// C is the third nibble.
+	// D is the fourth nibble.
+	// CD is the second byte.
+	// BCD is the second nibble along with the second byte.
+	void ins_0(byte, byte, byte, byte, double_byte);
+	void ins_1(byte, byte, byte, byte, double_byte);
+	void ins_2(byte, byte, byte, byte, double_byte);
+	void ins_3(byte, byte, byte, byte, double_byte);
+	void ins_4(byte, byte, byte, byte, double_byte);
+	void ins_5(byte, byte, byte, byte, double_byte);
+	void ins_6(byte, byte, byte, byte, double_byte);
+	void ins_7(byte, byte, byte, byte, double_byte);
+	void ins_8(byte, byte, byte, byte, double_byte);
+	void ins_9(byte, byte, byte, byte, double_byte);
+	void ins_A(byte, byte, byte, byte, double_byte);
+	void ins_B(byte, byte, byte, byte, double_byte);
+	void ins_C(byte, byte, byte, byte, double_byte);
+	void ins_D(byte, byte, byte, byte, double_byte);
+	void ins_E(byte, byte, byte, byte, double_byte);
+	void ins_F(byte, byte, byte, byte, double_byte);
+
+	// named instructions -- helper methods used by the above
+	void clear_screen();
+	void return_();
+	void jump(double_byte NNN);
+	void set_register(byte X, byte NN);
+	void add(byte X, byte NN);
+	void set_index_register(double_byte NNN);
+	void draw(byte X, byte Y, byte N);
 private:
 	std::array<byte, MEMORY_SIZE> memory;
 	std::array<byte, NUM_REGISTERS> registers;

@@ -1,10 +1,18 @@
 #include <cassert>
+#include <iostream>
+#include <cmath>
+#include <cstdlib>
+#include <stdexcept>
 
 #include <ftxui/screen/screen.hpp>
 
 #include "CHIP-8.hpp"
 #include "helpers.hpp"
 
+using std::pow;
+using std::cin;
+using std::exception;
+using std::rand;
 using ftxui::Screen;
 using ftxui::Dimension::Fixed;
 
@@ -33,12 +41,22 @@ CHIP_8::CHIP_8()
 
 	load_fonts(FONT_DATA_START_LOCATION, FONT_DATA);
 
-	executors[0x0] = &CHIP_8::clear_screen;
-	executors[0x1] = &CHIP_8::jump;
-	executors[0x6] = &CHIP_8::set_register;
-	executors[0x7] = &CHIP_8::add;
-	executors[0xA] = &CHIP_8::set_index_register;
-	executors[0xD] = &CHIP_8::draw;
+	executors[0x0] = &CHIP_8::ins_0;
+	executors[0x1] = &CHIP_8::ins_1;
+	executors[0x2] = &CHIP_8::ins_2;
+	executors[0x3] = &CHIP_8::ins_3;
+	executors[0x4] = &CHIP_8::ins_4;
+	executors[0x5] = &CHIP_8::ins_5;
+	executors[0x6] = &CHIP_8::ins_6;
+	executors[0x7] = &CHIP_8::ins_7;
+	executors[0x8] = &CHIP_8::ins_8;
+	executors[0x9] = &CHIP_8::ins_9;
+	executors[0xA] = &CHIP_8::ins_A;
+	executors[0xB] = &CHIP_8::ins_B;
+	executors[0xC] = &CHIP_8::ins_C;
+	executors[0xD] = &CHIP_8::ins_D;
+	executors[0xE] = &CHIP_8::ins_E;
+	executors[0xF] = &CHIP_8::ins_F;
 }
 
 void CHIP_8::load_program(const std::array<instruction_t, MAX_NUM_INSTRUCTIONS>& program)
@@ -108,7 +126,237 @@ void CHIP_8::load_fonts(double_byte start_location, const decltype(FONT_DATA)& f
 	}
 }
 
-void CHIP_8::clear_screen(byte, byte, byte, byte NN, double_byte)
+void CHIP_8::ins_0(byte X, byte Y, byte N, byte, double_byte)
+{
+	if (X == 0x0 && Y == 0xE && N == 0x0)
+	{
+		clear_screen();
+	}
+	else if (X == 0x0 && Y == 0xE && N == 0xE)
+	{
+		return_();
+	}
+	else
+	{
+		throw exception("Machine call (0NNN) is not supported.");
+	}
+}
+
+void CHIP_8::ins_1(byte, byte, byte, byte, double_byte NNN)
+{
+	if (NNN >= memory.size())
+	{
+		throw exception("Jump address out of range.");
+	}
+
+	jump(NNN);
+}
+
+void CHIP_8::ins_2(byte, byte, byte, byte, double_byte NNN)
+{
+	if (NNN >= memory.size())
+	{
+		throw exception("Subroutine address out of range.");
+	}
+
+	if (stack_pointer >= stack.size())
+	{
+		throw exception("Subroutine call limit reached.");
+	}
+
+	stack[stack_pointer++] = pc;
+	jump(NNN);
+}
+
+void CHIP_8::ins_3(byte X, byte, byte, byte NN, double_byte)
+{
+	if (registers[X] == NN)
+	{
+		pc += 2;
+	}
+}
+
+void CHIP_8::ins_4(byte X, byte, byte, byte NN, double_byte)
+{
+	if (registers[X] != NN)
+	{
+		pc += INSTRUCTION_SIZE;
+	}
+}
+
+void CHIP_8::ins_5(byte X, byte Y, byte N, byte, double_byte)
+{
+	if (N != 0)
+	{
+		throw exception("Unknown instruction. Category 0x5 instructions are of the form 0x5XY0.");
+	}
+
+	if (registers[X] == registers[Y])
+	{
+		pc += INSTRUCTION_SIZE;
+	}
+}
+
+void CHIP_8::ins_6(byte X, byte, byte, byte NN, double_byte)
+{
+	set_register(X, NN);
+}
+
+void CHIP_8::ins_7(byte X, byte, byte, byte NN, double_byte)
+{
+	add(X, NN);
+}
+
+void CHIP_8::ins_8(byte X, byte Y, byte N, byte, double_byte)
+{
+	switch (N)
+	{
+	case 0x0:
+		set_register(X, registers[Y]);
+		break;
+	case 0x1:
+		set_register(X, registers[X] | registers[Y]);
+		break;
+	case 0x2:
+		set_register(X, registers[X] & registers[Y]);
+		break;
+	case 0x3:
+		set_register(X, registers[X] ^ registers[Y]);
+		break;
+	case 0x4:
+	{
+		const auto sum = registers[X] + registers[Y];
+		set_register(X, sum);
+		set_register(0xF, sum > 0xFF);
+		break;
+	}
+	case 0x5:
+	{
+		const auto diff = registers[X] - registers[Y];
+		set_register(X, diff);
+		set_register(0xF, diff >= 0);
+		break;
+	}
+	case 0x6:
+	{
+		const auto lsb = registers[X] & 0x1;
+		set_register(0xF, lsb);
+		set_register(X, registers[X] >> 1);
+		break;
+	}
+	case 0x7:
+	{
+		const auto diff = registers[Y] - registers[X];
+		set_register(X, diff);
+		set_register(0xF, diff >= 0);
+		break;
+	}
+	case 0xE:
+	{
+		const auto msb = registers[X] & (1 << (BITS_PER_BYTE - 1));
+		set_register(0xF, msb);
+		set_register(X, registers[X] << 1);
+		break;
+	}
+	default:
+		throw exception("Invalid category 8 instruction format.");
+	}
+}
+
+void CHIP_8::ins_9(byte X, byte Y, byte N, byte, double_byte)
+{
+	if (N != 0)
+	{
+		throw exception("Invalid category 9 instruction format.");
+	}
+
+	if (registers[X] != registers[Y])
+	{
+		pc += INSTRUCTION_SIZE;
+	}
+}
+
+void CHIP_8::ins_A(byte, byte, byte, byte, double_byte NNN)
+{
+	set_index_register(NNN);
+}
+
+void CHIP_8::ins_B(byte, byte, byte, byte, double_byte NNN)
+{
+	jump(registers[0] + NNN);
+}
+
+void CHIP_8::ins_C(byte X, byte, byte, byte NN, double_byte)
+{
+	const auto random = rand() % (int)pow(2, BITS_PER_BYTE);
+	set_register(X, random & NN);
+}
+
+void CHIP_8::ins_D(byte X, byte Y, byte N, byte, double_byte)
+{
+	draw(X, Y, N);
+}
+
+void CHIP_8::ins_E(byte X, byte, byte, byte NN, double_byte)
+{
+	throw exception("Not implemented.");
+}
+
+void CHIP_8::ins_F(byte X, byte, byte, byte NN, double_byte)
+{
+	switch (NN)
+	{
+	case 0x07:
+		set_register(X, delay_timer);
+		break;
+	case 0x0A:
+	{
+		char ch;
+		cin >> ch;
+		// TODO: decode ch to correct key
+		set_register(X, ch);
+		break;
+	}
+	case 0x15:
+	{
+		delay_timer = registers[X];
+		break;
+	}
+	case 0x18:
+	{
+		sound_timer = registers[X];
+		break;
+	}
+	case 0x1E:
+		set_index_register(index_register + registers[X]);
+		break;
+	case 0x29:
+	{
+		// TODO: Implement this
+		break;
+	}
+	case 0x33:
+	{
+		// TODO: Implement this
+		break;
+	}
+	case 0x55:
+	{
+		// TODO: Implement this
+		break;
+	}
+	case 0x65:
+	{
+		// TODO: Implement this
+		break;
+	}
+	default:
+		throw exception("Invalid category F instruction format.");
+		break;
+	}
+}
+
+void CHIP_8::clear_screen()
 {
 	for (size_t x = 0, width = FRAME_BUFFER_WIDTH; x < width; ++x)
 	{
@@ -119,30 +367,41 @@ void CHIP_8::clear_screen(byte, byte, byte, byte NN, double_byte)
 	}
 }
 
-void CHIP_8::jump(byte, byte, byte, byte N, double_byte NNN)
+void CHIP_8::return_()
+{
+	if (stack_pointer == 0)
+	{
+		throw exception("No return address in stack.");
+	}
+
+	const auto return_addr = stack[stack_pointer--];
+	jump(return_addr);
+}
+
+void CHIP_8::jump(double_byte NNN)
 {
 	assert(NNN < memory.size());
 	pc = NNN;
 }
 
-void CHIP_8::set_register(byte X, byte, byte N, byte NN, double_byte)
+void CHIP_8::set_register(byte X, byte NN)
 {
 	assert(X < registers.size());
 	registers[X] = NN;
 }
 
-void CHIP_8::add(byte X, byte, byte N, byte NN, double_byte)
+void CHIP_8::add(byte X, byte NN)
 {
 	assert(X < registers.size());
 	registers[X] += NN;
 }
 
-void CHIP_8::set_index_register(byte, byte, byte, byte NN, double_byte NNN)
+void CHIP_8::set_index_register(double_byte NNN)
 {
 	index_register = NNN;
 }
 
-void CHIP_8::draw(byte X, byte Y, byte N, byte NN, double_byte)
+void CHIP_8::draw(byte X, byte Y, byte N)
 {
 	assert(X < registers.size());
 	assert(Y < registers.size());
