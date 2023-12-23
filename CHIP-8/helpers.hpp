@@ -20,3 +20,6 @@ double_byte concatenate_bytes(byte b1, byte b2);
 double_byte get_nibbles_in_range(double_byte b, int first, int last);
 
 std::vector<int> get_digits(size_t num);
+
+byte get_most_significant_bit(byte num);
+byte get_least_significant_bit(byte num);

@@ -59,3 +59,13 @@ vector<int> get_digits(size_t num)
 	reverse(digits.begin(), digits.end());
 	return digits;
 }
+
+byte get_most_significant_bit(byte value)
+{
+	return value & (1 << (BITS_PER_BYTE - 1));
+}
+
+byte get_least_significant_bit(byte value)
+{
+	return value & 1;
+}

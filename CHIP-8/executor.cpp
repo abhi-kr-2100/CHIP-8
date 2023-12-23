@@ -143,7 +143,7 @@ void Executor::operate_and_assign(const CHIP_8::Instruction::Instruction_payload
 	}
 	case 0x6:
 	{
-		const auto lsb = machine.registers[payload.X] & 0x1;
+		const auto lsb = get_least_significant_bit(machine.registers[payload.X]);
 		machine.registers[0xF] = lsb;
 		machine.registers[payload.X] >>= 1;
 		break;
@@ -157,7 +157,7 @@ void Executor::operate_and_assign(const CHIP_8::Instruction::Instruction_payload
 	}
 	case 0xE:
 	{
-		const auto msb = machine.registers[payload.X] & (1 << (BITS_PER_BYTE - 1));
+		const auto msb = get_most_significant_bit(machine.registers[payload.X]);
 		machine.registers[0xF] = msb;
 		machine.registers[payload.X] <<= 1;
 		break;
