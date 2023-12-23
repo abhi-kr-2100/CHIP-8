@@ -331,9 +331,9 @@ void CHIP_8::ins_F(const CHIP_8::Instruction::Instruction_payload& payload)
 
 void CHIP_8::clear_screen()
 {
-	for (size_t x = 0, width = FRAME_BUFFER_WIDTH; x < width; ++x)
+	for (size_t x = 0, width = frame_buffer.size(); x < width; ++x)
 	{
-		for (size_t y = 0, height = FRAME_BUFFER_HEIGHT; y < height; ++y)
+		for (size_t y = 0, height = frame_buffer[0].size(); y < height; ++y)
 		{
 			frame_buffer[x][y] = false;
 		}
