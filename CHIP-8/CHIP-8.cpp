@@ -82,16 +82,6 @@ bool CHIP_8::run_one()
 	return true;
 }
 
-/**
- * Run the entire loaded program till completion from the current PC.
- */
-void CHIP_8::run()
-{
-	while (run_one())
-	{
-	}
-}
-
 void CHIP_8::load_fonts(double_byte start_location, const decltype(FONT_DATA)& font_data)
 {
 	assert(start_location < MEMORY_SIZE);

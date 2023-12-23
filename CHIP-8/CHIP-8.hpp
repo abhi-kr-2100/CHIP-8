@@ -13,7 +13,6 @@ class CHIP_8
 {
 public:
 	void load_program(const std::array<instruction_t, MAX_NUM_INSTRUCTIONS>& program);
-	void run();
 	bool run_one();
 
 	bool get_pixel_at(size_t x, size_t y) const;
