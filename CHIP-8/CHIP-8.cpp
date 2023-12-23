@@ -82,18 +82,19 @@ bool CHIP_8::run_one()
 	return true;
 }
 
-void CHIP_8::load_fonts(double_byte start_location, const decltype(FONT_DATA)& font_data)
+void
+CHIP_8::load_fonts(double_byte start_loc, const decltype(FONT_DATA)& fonts)
 {
-	assert(start_location < MEMORY_SIZE);
-	assert(FONT_NUM_CHARS == font_data.size());
-	assert(FONT_CHAR_SIZE == font_data[0].size());
+	const auto nfont = fonts.size();
+	const auto fontsz = fonts[0].size();
 
-	for (size_t i = 0; i < FONT_NUM_CHARS; ++i)
+	for (size_t font_ctr = 0; font_ctr < nfont; ++font_ctr)
 	{
-		for (size_t j = 0; j < FONT_CHAR_SIZE; ++j)
+		for (size_t byte_ctr = 0; byte_ctr < fontsz; ++byte_ctr)
 		{
-			assert(FONT_DATA_START_LOCATION + FONT_CHAR_SIZE * i + j < MEMORY_SIZE);
-			memory[FONT_DATA_START_LOCATION + FONT_CHAR_SIZE * i + j] = font_data[i][j];
+			const auto insert_loc = start_loc + font_ctr * fontsz + byte_ctr;
+			assert(insert_loc < memory.size());
+			memory[insert_loc] = fonts[font_ctr][byte_ctr];
 		}
 	}
 }
