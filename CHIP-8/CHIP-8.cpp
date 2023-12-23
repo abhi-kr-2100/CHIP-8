@@ -70,43 +70,34 @@ void CHIP_8::load_program(const std::array<instruction_t, MAX_NUM_INSTRUCTIONS>&
 }
 
 /**
- * A CHIP-8 instruction is 2 bytes long. The first half-byte ("nibble") of the opcode
- * is the category of the instruction. The interpretation of the rest of the nibbles
- * depends on the opcode.
- * 
- * The various interpretations of the other nibbles are as follows:
- * - X: (the 2nd nibble): used to look up one of the 16 registers.
- * - Y: (the 3rd nibble): also used to look up one of the 16 registers.
- * - N: (the 4th nibble): a 4-bit number.
- * - NN: (the 2nd byte): an 8-bit number.
- * - NNN: (the 2nd, 3rd, and the 4th nibble): a 12-bit immediate memory address.
+ * Fetch and execute one instruction. Increment PC.
+ *
+ * Returns true if there are more instructions to execute, false otherwise.
+ */
+bool CHIP_8::run_one()
+{
+	const auto ins = get_current_instruction();
+	pc += INSTRUCTION_SIZE;
+
+	// 0x0000 is not a valid CHIP-8 instruction. However, empty memory cells
+	// are 0. When a program has run to completion, PC points to empty memory
+	// cells.
+	if (ins.raw_instruction == 0)
+	{
+		return false;
+	}
+
+	(this->*executors[ins.category])(ins.payload);
+	return true;
+}
+
+/**
+ * Run the entire loaded program till completion from the current PC.
  */
 void CHIP_8::run()
 {
-	while (true)
+	while (run_one())
 	{
-		assert(pc < MEMORY_SIZE);
-		const instruction_t curr_instruction = memory[pc] << (sizeof(byte) * BITS_PER_BYTE) | memory[pc + 1];
-		pc += 2;
-
-
-		if (curr_instruction == 0)
-		{
-			return;
-		}
-
-		const byte category = get_nibbles_in_range(curr_instruction, 0, 0);
-
-		// although the nibble/s required depends on the particular opcode, we decode
-		// everything at one place for simplicity
-		const byte X = get_nibbles_in_range(curr_instruction, 1, 1);
-		const byte Y = get_nibbles_in_range(curr_instruction, 2, 2);
-		const byte N = get_nibbles_in_range(curr_instruction, 3, 3);
-		const byte NN = get_nibbles_in_range(curr_instruction, 2, 3);
-		const double_byte NNN = get_nibbles_in_range(curr_instruction, 1, 3);
-
-		assert(executors.find(category) != executors.end());
-		(this->*executors[category])(X, Y, N, NN, NNN);
 	}
 }
 
@@ -115,7 +106,7 @@ void CHIP_8::load_fonts(double_byte start_location, const decltype(FONT_DATA)& f
 	assert(start_location < MEMORY_SIZE);
 	assert(FONT_NUM_CHARS == font_data.size());
 	assert(FONT_CHAR_SIZE == font_data[0].size());
-	
+
 	for (size_t i = 0; i < FONT_NUM_CHARS; ++i)
 	{
 		for (size_t j = 0; j < FONT_CHAR_SIZE; ++j)
@@ -126,13 +117,13 @@ void CHIP_8::load_fonts(double_byte start_location, const decltype(FONT_DATA)& f
 	}
 }
 
-void CHIP_8::ins_0(byte X, byte Y, byte N, byte, double_byte)
+void CHIP_8::ins_0(const Instruction_payload& payload)
 {
-	if (X == 0x0 && Y == 0xE && N == 0x0)
+	if (payload.X == 0x0 && payload.Y == 0xE && payload.N == 0x0)
 	{
 		clear_screen();
 	}
-	else if (X == 0x0 && Y == 0xE && N == 0xE)
+	else if (payload.X == 0x0 && payload.Y == 0xE && payload.N == 0xE)
 	{
 		return_();
 	}
@@ -142,19 +133,19 @@ void CHIP_8::ins_0(byte X, byte Y, byte N, byte, double_byte)
 	}
 }
 
-void CHIP_8::ins_1(byte, byte, byte, byte, double_byte NNN)
+void CHIP_8::ins_1(const Instruction_payload& payload)
 {
-	if (NNN >= memory.size())
+	if (payload.NNN >= memory.size())
 	{
 		throw exception("Jump address out of range.");
 	}
 
-	jump(NNN);
+	jump(payload.NNN);
 }
 
-void CHIP_8::ins_2(byte, byte, byte, byte, double_byte NNN)
+void CHIP_8::ins_2(const Instruction_payload& payload)
 {
-	if (NNN >= memory.size())
+	if (payload.NNN >= memory.size())
 	{
 		throw exception("Subroutine address out of range.");
 	}
@@ -165,97 +156,97 @@ void CHIP_8::ins_2(byte, byte, byte, byte, double_byte NNN)
 	}
 
 	stack[stack_pointer++] = pc;
-	jump(NNN);
+	jump(payload.NNN);
 }
 
-void CHIP_8::ins_3(byte X, byte, byte, byte NN, double_byte)
+void CHIP_8::ins_3(const Instruction_payload& payload)
 {
-	if (registers[X] == NN)
+	if (registers[payload.X] == payload.NN)
 	{
 		pc += 2;
 	}
 }
 
-void CHIP_8::ins_4(byte X, byte, byte, byte NN, double_byte)
+void CHIP_8::ins_4(const Instruction_payload& payload)
 {
-	if (registers[X] != NN)
+	if (registers[payload.X] != payload.NN)
 	{
 		pc += INSTRUCTION_SIZE;
 	}
 }
 
-void CHIP_8::ins_5(byte X, byte Y, byte N, byte, double_byte)
+void CHIP_8::ins_5(const Instruction_payload& payload)
 {
-	if (N != 0)
+	if (payload.N != 0)
 	{
 		throw exception("Unknown instruction. Category 0x5 instructions are of the form 0x5XY0.");
 	}
 
-	if (registers[X] == registers[Y])
+	if (registers[payload.X] == registers[payload.Y])
 	{
 		pc += INSTRUCTION_SIZE;
 	}
 }
 
-void CHIP_8::ins_6(byte X, byte, byte, byte NN, double_byte)
+void CHIP_8::ins_6(const Instruction_payload& payload)
 {
-	set_register(X, NN);
+	set_register(payload.X, payload.NN);
 }
 
-void CHIP_8::ins_7(byte X, byte, byte, byte NN, double_byte)
+void CHIP_8::ins_7(const Instruction_payload& payload)
 {
-	add(X, NN);
+	add(payload.X, payload.NN);
 }
 
-void CHIP_8::ins_8(byte X, byte Y, byte N, byte, double_byte)
+void CHIP_8::ins_8(const Instruction_payload& payload)
 {
-	switch (N)
+	switch (payload.N)
 	{
 	case 0x0:
-		set_register(X, registers[Y]);
+		set_register(payload.X, registers[payload.Y]);
 		break;
 	case 0x1:
-		set_register(X, registers[X] | registers[Y]);
+		set_register(payload.X, registers[payload.X] | registers[payload.Y]);
 		break;
 	case 0x2:
-		set_register(X, registers[X] & registers[Y]);
+		set_register(payload.X, registers[payload.X] & registers[payload.Y]);
 		break;
 	case 0x3:
-		set_register(X, registers[X] ^ registers[Y]);
+		set_register(payload.X, registers[payload.X] ^ registers[payload.Y]);
 		break;
 	case 0x4:
 	{
-		const auto sum = registers[X] + registers[Y];
-		set_register(X, sum);
+		const auto sum = registers[payload.X] + registers[payload.Y];
+		set_register(payload.X, sum);
 		set_register(0xF, sum > 0xFF);
 		break;
 	}
 	case 0x5:
 	{
-		const auto diff = registers[X] - registers[Y];
-		set_register(X, diff);
+		const auto diff = registers[payload.X] - registers[payload.Y];
+		set_register(payload.X, diff);
 		set_register(0xF, diff >= 0);
 		break;
 	}
 	case 0x6:
 	{
-		const auto lsb = registers[X] & 0x1;
+		const auto lsb = registers[payload.X] & 0x1;
 		set_register(0xF, lsb);
-		set_register(X, registers[X] >> 1);
+		set_register(payload.X, registers[payload.X] >> 1);
 		break;
 	}
 	case 0x7:
 	{
-		const auto diff = registers[Y] - registers[X];
-		set_register(X, diff);
+		const auto diff = registers[payload.Y] - registers[payload.X];
+		set_register(payload.X, diff);
 		set_register(0xF, diff >= 0);
 		break;
 	}
 	case 0xE:
 	{
-		const auto msb = registers[X] & (1 << (BITS_PER_BYTE - 1));
+		const auto msb = registers[payload.X] & (1 << (BITS_PER_BYTE - 1));
 		set_register(0xF, msb);
-		set_register(X, registers[X] << 1);
+		set_register(payload.X, registers[payload.X] << 1);
 		break;
 	}
 	default:
@@ -263,72 +254,72 @@ void CHIP_8::ins_8(byte X, byte Y, byte N, byte, double_byte)
 	}
 }
 
-void CHIP_8::ins_9(byte X, byte Y, byte N, byte, double_byte)
+void CHIP_8::ins_9(const Instruction_payload& payload)
 {
-	if (N != 0)
+	if (payload.N != 0)
 	{
 		throw exception("Invalid category 9 instruction format.");
 	}
 
-	if (registers[X] != registers[Y])
+	if (registers[payload.X] != registers[payload.Y])
 	{
 		pc += INSTRUCTION_SIZE;
 	}
 }
 
-void CHIP_8::ins_A(byte, byte, byte, byte, double_byte NNN)
+void CHIP_8::ins_A(const Instruction_payload& payload)
 {
-	set_index_register(NNN);
+	set_index_register(payload.NNN);
 }
 
-void CHIP_8::ins_B(byte, byte, byte, byte, double_byte NNN)
+void CHIP_8::ins_B(const Instruction_payload& payload)
 {
-	jump(registers[0] + NNN);
+	jump(registers[0] + payload.NNN);
 }
 
-void CHIP_8::ins_C(byte X, byte, byte, byte NN, double_byte)
+void CHIP_8::ins_C(const Instruction_payload& payload)
 {
 	const auto random = rand() % (int)pow(2, BITS_PER_BYTE);
-	set_register(X, random & NN);
+	set_register(payload.X, random & payload.NN);
 }
 
-void CHIP_8::ins_D(byte X, byte Y, byte N, byte, double_byte)
+void CHIP_8::ins_D(const Instruction_payload& payload)
 {
-	draw(X, Y, N);
+	draw(payload.X, payload.Y, payload.N);
 }
 
-void CHIP_8::ins_E(byte X, byte, byte, byte NN, double_byte)
+void CHIP_8::ins_E(const Instruction_payload& payload)
 {
 	throw exception("Not implemented.");
 }
 
-void CHIP_8::ins_F(byte X, byte, byte, byte NN, double_byte)
+void CHIP_8::ins_F(const Instruction_payload& payload)
 {
-	switch (NN)
+	switch (payload.NN)
 	{
 	case 0x07:
-		set_register(X, delay_timer);
+		set_register(payload.X, delay_timer);
 		break;
 	case 0x0A:
 	{
 		char ch;
 		cin >> ch;
 		// TODO: decode ch to correct key
-		set_register(X, ch);
+		set_register(payload.X, ch);
 		break;
 	}
 	case 0x15:
 	{
-		delay_timer = registers[X];
+		delay_timer = registers[payload.X];
 		break;
 	}
 	case 0x18:
 	{
-		sound_timer = registers[X];
+		sound_timer = registers[payload.X];
 		break;
 	}
 	case 0x1E:
-		set_index_register(index_register + registers[X]);
+		set_index_register(index_register + registers[payload.X]);
 		break;
 	case 0x29:
 	{
@@ -449,4 +440,34 @@ void CHIP_8::set_frame_buffer_pixel(size_t x, size_t y, bool val)
 
 	frame_buffer.at(x, y) = val ? "*" : " ";
 	frame_buffer.Print();
+}
+
+Instruction CHIP_8::get_current_instruction() const
+{
+	// A CHIP-8 insturction is 2 bytes long; hence `pc + 1`.
+	if (pc + 1 >= memory.size())
+	{
+		throw exception(
+			"get_current_instruction: program counter points outside memory."
+		);
+	}
+
+	const instruction_t ins = concatenate_bytes(memory.at(pc), memory.at(pc + 1));
+
+	const byte category = get_nibbles_in_range(ins, 0, 0);
+
+	const byte X = get_nibbles_in_range(ins, 1, 1);
+	const byte Y = get_nibbles_in_range(ins, 2, 2);
+	const byte N = get_nibbles_in_range(ins, 3, 3);
+	const byte NN = get_nibbles_in_range(ins, 2, 3);
+	const double_byte NNN = get_nibbles_in_range(ins, 1, 3);
+
+	return Instruction
+	{
+		ins,
+		category,
+		{
+			X, Y, N, NN, NNN
+		},
+	};
 }

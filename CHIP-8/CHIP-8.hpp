@@ -11,45 +11,64 @@
 #include "font-data.hpp"
 #include "machine-specs.hpp"
 
+/**
+ * A CHIP-8 instruction is 2 bytes (or 4 nibbles) long, and can be
+ * represented using 4 hexadecimal digits (one for each nibble).
+ * 
+ * The leftmost digit is the category which determines how the
+ * remaining 3 digits are interpreted. 
+ * 
+ * The various interpretations of the other nibbles are as follows:
+ * - X: the 2nd nibble
+ * - Y: the 3rd nibble
+ * - N: the 4th nibble
+ * - NN: the 2nd byte
+ * - NNN: the 2nd, 3rd, and the 4th nibbles
+ */
+struct Instruction_payload
+{
+	byte X;
+	byte Y;
+	byte N;
+	byte NN;
+	double_byte NNN;
+};
+
+struct Instruction
+{
+	instruction_t raw_instruction;
+	byte category;
+	Instruction_payload payload;
+};
+
 class CHIP_8
 {
 public:
 	void load_program(const std::array<instruction_t, MAX_NUM_INSTRUCTIONS>& program);
 	void run();
+	bool run_one();
 
 	CHIP_8();
 
 	bool get_frame_buffer_pixel(size_t x, size_t y);
 	void set_frame_buffer_pixel(size_t x, size_t y, bool val);
 
-	// CHIP-8 op codes are two bytes (or 4 nibbles). The category of the op code
-	// is determined by the first nibble, while the remaining 3 nibbles may be
-	// grouped in various ways depending on the particular instruction.
-	// We dedicate one method each to each category of op code. We group the
-	// remaining nibbles in the following way:
-	// If 0xABCD is the opcode, A, the first nibble, is the category.
-	// B is the second nibble (stored in a byte since byte is the smallest
-	// addressable unit).
-	// C is the third nibble.
-	// D is the fourth nibble.
-	// CD is the second byte.
-	// BCD is the second nibble along with the second byte.
-	void ins_0(byte, byte, byte, byte, double_byte);
-	void ins_1(byte, byte, byte, byte, double_byte);
-	void ins_2(byte, byte, byte, byte, double_byte);
-	void ins_3(byte, byte, byte, byte, double_byte);
-	void ins_4(byte, byte, byte, byte, double_byte);
-	void ins_5(byte, byte, byte, byte, double_byte);
-	void ins_6(byte, byte, byte, byte, double_byte);
-	void ins_7(byte, byte, byte, byte, double_byte);
-	void ins_8(byte, byte, byte, byte, double_byte);
-	void ins_9(byte, byte, byte, byte, double_byte);
-	void ins_A(byte, byte, byte, byte, double_byte);
-	void ins_B(byte, byte, byte, byte, double_byte);
-	void ins_C(byte, byte, byte, byte, double_byte);
-	void ins_D(byte, byte, byte, byte, double_byte);
-	void ins_E(byte, byte, byte, byte, double_byte);
-	void ins_F(byte, byte, byte, byte, double_byte);
+	void ins_0(const Instruction_payload& payload);
+	void ins_1(const Instruction_payload& payload);
+	void ins_2(const Instruction_payload& payload);
+	void ins_3(const Instruction_payload& payload);
+	void ins_4(const Instruction_payload& payload);
+	void ins_5(const Instruction_payload& payload);
+	void ins_6(const Instruction_payload& payload);
+	void ins_7(const Instruction_payload& payload);
+	void ins_8(const Instruction_payload& payload);
+	void ins_9(const Instruction_payload& payload);
+	void ins_A(const Instruction_payload& payload);
+	void ins_B(const Instruction_payload& payload);
+	void ins_C(const Instruction_payload& payload);
+	void ins_D(const Instruction_payload& payload);
+	void ins_E(const Instruction_payload& payload);
+	void ins_F(const Instruction_payload& payload);
 
 	// named instructions -- helper methods used by the above
 	void clear_screen();
@@ -73,7 +92,8 @@ private:
 	byte delay_timer;
 	byte sound_timer;
 
-	std::map<byte, void(CHIP_8::*)(byte, byte, byte, byte, double_byte)> executors;
+	std::map<byte, void(CHIP_8::*)(const Instruction_payload&)> executors;
 
 	void load_fonts(double_byte start_location, const decltype(FONT_DATA)& font_data);
+	Instruction get_current_instruction() const;
 };
