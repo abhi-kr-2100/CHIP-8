@@ -12,19 +12,26 @@ private:
 	const std::array<void(Executor::*)(const CHIP_8::Instruction::Instruction_payload&), 16> executors;
 
 	void category_0(const CHIP_8::Instruction::Instruction_payload& payload);
-	void category_1(const CHIP_8::Instruction::Instruction_payload& payload);
-	void category_2(const CHIP_8::Instruction::Instruction_payload& payload);
-	void category_3(const CHIP_8::Instruction::Instruction_payload& payload);
-	void category_4(const CHIP_8::Instruction::Instruction_payload& payload);
-	void category_5(const CHIP_8::Instruction::Instruction_payload& payload);
-	void category_6(const CHIP_8::Instruction::Instruction_payload& payload);
-	void category_7(const CHIP_8::Instruction::Instruction_payload& payload);
-	void category_8(const CHIP_8::Instruction::Instruction_payload& payload);
-	void category_9(const CHIP_8::Instruction::Instruction_payload& payload);
-	void category_A(const CHIP_8::Instruction::Instruction_payload& payload);
-	void category_B(const CHIP_8::Instruction::Instruction_payload& payload);
-	void category_C(const CHIP_8::Instruction::Instruction_payload& payload);
-	void category_D(const CHIP_8::Instruction::Instruction_payload& payload);
-	void category_E(const CHIP_8::Instruction::Instruction_payload& payload);
+	void jump(const CHIP_8::Instruction::Instruction_payload& payload);
+	void subroutine_call(const CHIP_8::Instruction::Instruction_payload& payload);
+	void skip_if_vx_eq_nn(const CHIP_8::Instruction::Instruction_payload& payload);
+	void skip_if_vx_neq_nn(const CHIP_8::Instruction::Instruction_payload& payload);
+	void skip_if_vx_eq_vy(const CHIP_8::Instruction::Instruction_payload& payload);
+	void set_register(const CHIP_8::Instruction::Instruction_payload& payload);
+	void inc_reg_by_const(const CHIP_8::Instruction::Instruction_payload& payload);
+	void operate_and_assign(const CHIP_8::Instruction::Instruction_payload& payload);
+	void skip_if_vx_neq_vy(const CHIP_8::Instruction::Instruction_payload& payload);
+	void set_index_register(const CHIP_8::Instruction::Instruction_payload& payload);
+	void jump_with_offset(const CHIP_8::Instruction::Instruction_payload& payload);
+	void set_random(const CHIP_8::Instruction::Instruction_payload& payload);
+	void draw(const CHIP_8::Instruction::Instruction_payload& payload);
+	void skip_cond_key(const CHIP_8::Instruction::Instruction_payload& payload);
 	void category_F(const CHIP_8::Instruction::Instruction_payload& payload);
+
+	class Helper
+	{
+	public:
+		static void clear_screen(CHIP_8& machine);
+		static void return_(CHIP_8& machine);
+	};
 };

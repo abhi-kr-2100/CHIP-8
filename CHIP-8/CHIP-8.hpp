@@ -51,15 +51,6 @@ public:
 		byte category;
 		Instruction_payload payload;
 	};
-
-	// named instructions -- to be moved elsewhere
-	void clear_screen();
-	void return_();
-	void jump(double_byte NNN);
-	void set_register(byte X, byte NN);
-	void add(byte X, byte NN);
-	void set_index_register(double_byte NNN);
-	void draw(byte X, byte Y, byte N);
 private:
 	std::array<byte, MEMORY_SIZE> memory;
 	std::array<byte, NUM_REGISTERS> registers;
