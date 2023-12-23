@@ -3,6 +3,8 @@
 #include <array>
 #include <vector>
 
+#include <ftxui/screen/screen.hpp>
+
 #include "CHIP-8.hpp"
 #include "helpers.hpp"
 
@@ -12,6 +14,9 @@ using std::ifstream;
 using std::array;
 using std::ios;
 using std::vector;
+
+using ftxui::Screen;
+using ftxui::Dimension::Fixed;
 
 int main(int argc, char* argv[])
 {
@@ -39,7 +44,22 @@ int main(int argc, char* argv[])
 
 	CHIP_8 machine;
 	machine.load_program(program);
-	machine.run();
+
+	auto screen
+	{ 
+		Screen::Create(Fixed(FRAME_BUFFER_WIDTH), Fixed(FRAME_BUFFER_HEIGHT))
+	};
+	while (machine.run_one())
+	{
+		for (size_t x = 0; x < FRAME_BUFFER_WIDTH; ++x)
+		{
+			for (size_t y = 0; y < FRAME_BUFFER_HEIGHT; ++y)
+			{
+				screen.at(x, y) = machine.get_pixel_at(x, y) ? "*" : " ";
+			}
+		}
+		screen.Print();
+	}
 
 	cerr << "Press enter to exit...";
 	cin.get();

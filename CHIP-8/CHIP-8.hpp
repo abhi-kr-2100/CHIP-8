@@ -5,8 +5,6 @@
 #include <functional>
 #include <map>
 
-#include <ftxui/screen/screen.hpp>
-
 #include "data-types.hpp"
 #include "font-data.hpp"
 #include "machine-specs.hpp"
@@ -45,13 +43,13 @@ class CHIP_8
 {
 public:
 	void load_program(const std::array<instruction_t, MAX_NUM_INSTRUCTIONS>& program);
+	
 	void run();
 	bool run_one();
 
-	CHIP_8();
+	bool get_pixel_at(size_t x, size_t y) const;
 
-	bool get_frame_buffer_pixel(size_t x, size_t y);
-	void set_frame_buffer_pixel(size_t x, size_t y, bool val);
+	CHIP_8();
 
 	void ins_0(const Instruction_payload& payload);
 	void ins_1(const Instruction_payload& payload);
@@ -83,7 +81,7 @@ private:
 	std::array<byte, NUM_REGISTERS> registers;
 	std::array<double_byte, STACK_SIZE / STACK_ENTRY_SIZE> stack;
 
-	ftxui::Screen frame_buffer;
+	std::array<std::array<bool, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH> frame_buffer;
 
 	double_byte pc;
 	double_byte index_register;

@@ -4,8 +4,6 @@
 #include <cstdlib>
 #include <stdexcept>
 
-#include <ftxui/screen/screen.hpp>
-
 #include "CHIP-8.hpp"
 #include "helpers.hpp"
 
@@ -13,11 +11,9 @@ using std::pow;
 using std::cin;
 using std::exception;
 using std::rand;
-using ftxui::Screen;
-using ftxui::Dimension::Fixed;
 
 CHIP_8::CHIP_8()
-	: pc{PROGRAM_DATA_START_LOCATION}, frame_buffer{Screen::Create(Fixed(FRAME_BUFFER_WIDTH), Fixed(FRAME_BUFFER_HEIGHT))}
+	: pc{PROGRAM_DATA_START_LOCATION}
 {
 	for (auto& m : memory)
 	{
@@ -35,7 +31,7 @@ CHIP_8::CHIP_8()
 	{
 		for (size_t y = 0; y < FRAME_BUFFER_HEIGHT; ++y)
 		{
-			set_frame_buffer_pixel(x, y, false);
+			frame_buffer[x][y] = false;
 		}
 	}
 
@@ -353,7 +349,7 @@ void CHIP_8::clear_screen()
 	{
 		for (size_t y = 0, height = FRAME_BUFFER_HEIGHT; y < height; ++y)
 		{
-			set_frame_buffer_pixel(x, y, false);
+			frame_buffer[x][y] = false;
 		}
 	}
 }
@@ -413,33 +409,16 @@ void CHIP_8::draw(byte X, byte Y, byte N)
 			const auto bit = bits & (1 << (BITS_PER_BYTE - j - 1));
 			if (bit)
 			{
-				set_frame_buffer_pixel(x + j, y + i, true);
+				frame_buffer[x + j][y + i] = true;
 				continue;
 			}
-			if (get_frame_buffer_pixel(x + j, y + i))
+			if (frame_buffer[x + j][y + i])
 			{
 				registers[0xf] = 1;
 			}
-			set_frame_buffer_pixel(x + j, y + i, false);
+			frame_buffer[x + j][y + i] = false;
 		}
 	}
-}
-
-bool CHIP_8::get_frame_buffer_pixel(size_t x, size_t y)
-{
-	assert(x < FRAME_BUFFER_WIDTH);
-	assert(y < FRAME_BUFFER_HEIGHT);
-
-	return frame_buffer.at(x, y) == "*";
-}
-
-void CHIP_8::set_frame_buffer_pixel(size_t x, size_t y, bool val)
-{
-	assert(x < FRAME_BUFFER_WIDTH);
-	assert(y < FRAME_BUFFER_HEIGHT);
-
-	frame_buffer.at(x, y) = val ? "*" : " ";
-	frame_buffer.Print();
 }
 
 Instruction CHIP_8::get_current_instruction() const
@@ -470,4 +449,14 @@ Instruction CHIP_8::get_current_instruction() const
 			X, Y, N, NN, NNN
 		},
 	};
+}
+
+bool CHIP_8::get_pixel_at(size_t x, size_t y) const
+{
+	if (x >= frame_buffer.size() || y >= frame_buffer[0].size())
+	{
+		throw exception("get_pixel_at: coordinate out of screen.");
+	}
+
+	return frame_buffer.at(x).at(y);
 }
