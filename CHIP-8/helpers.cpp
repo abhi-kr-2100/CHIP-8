@@ -62,7 +62,7 @@ vector<int> get_digits(size_t num)
 
 byte get_most_significant_bit(byte value)
 {
-	return value & (1 << (BITS_PER_BYTE - 1));
+	return (value >> (BITS_PER_BYTE - 1)) & 1;
 }
 
 byte get_least_significant_bit(byte value)
