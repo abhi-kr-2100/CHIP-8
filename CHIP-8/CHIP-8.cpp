@@ -15,25 +15,10 @@ using std::rand;
 CHIP_8::CHIP_8()
 	: pc{PROGRAM_DATA_START_LOCATION}
 {
-	for (auto& m : memory)
-	{
-		m = 0;
-	}
-	for (auto& r : registers)
-	{
-		r = 0;
-	}
-	for (auto& s : stack)
-	{
-		s = 0;
-	}
-	for (size_t x = 0; x < FRAME_BUFFER_WIDTH; ++x)
-	{
-		for (size_t y = 0; y < FRAME_BUFFER_HEIGHT; ++y)
-		{
-			frame_buffer[x][y] = false;
-		}
-	}
+	memory.fill(0);
+	registers.fill(0);
+	stack.fill(0);
+	frame_buffer.fill({});
 
 	load_fonts(FONT_DATA_START_LOCATION, FONT_DATA);
 
