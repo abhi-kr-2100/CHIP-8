@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <vector>
 
 #include "data-types.hpp"
 #include "machine-specs.hpp"
@@ -17,3 +18,5 @@ double_byte concatenate_bytes(byte b1, byte b2);
  * get_nibbles_in_range(0xABCD, 1, 2) will return 0x00BC.
  */
 double_byte get_nibbles_in_range(double_byte b, int first, int last);
+
+std::vector<int> get_digits(size_t num);

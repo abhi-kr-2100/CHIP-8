@@ -1,4 +1,10 @@
+#include <vector>
+#include <algorithm>
+
 #include "helpers.hpp"
+
+using std::vector;
+using std::reverse;
 
 double_byte concatenate_bytes(byte b1, byte b2)
 {
@@ -38,4 +44,18 @@ double_byte get_nibbles_in_range(double_byte b, int first, int last)
 	}
 
 	return b & (mask - 1);
+}
+
+vector<int> get_digits(size_t num)
+{
+	vector<int> digits;
+	
+	for (; num != 0; num /= 10)
+	{
+		const auto d = num % 10;
+		digits.push_back(d);
+	}
+
+	reverse(digits.begin(), digits.end());
+	return digits;
 }

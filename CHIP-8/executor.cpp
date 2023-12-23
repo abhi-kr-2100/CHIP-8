@@ -1,9 +1,16 @@
 #include <stdexcept>
+#include <vector>
+
+#include <SFML/Window.hpp>
 
 #include "executor.hpp"
 #include "CHIP-8.hpp"
+#include "helpers.hpp"
 
 using std::exception;
+using std::vector;
+
+using sf::Keyboard;
 
 Executor::Executor(CHIP_8& machine)
 	: machine{ machine }, executors{
@@ -217,7 +224,43 @@ void Executor::draw(const CHIP_8::Instruction::Instruction_payload& payload)
 
 void Executor::skip_cond_key(const CHIP_8::Instruction::Instruction_payload& payload)
 {
-	throw exception("Not implemented.");
+	switch (payload.NN)
+	{
+	case 0x9E:
+	{
+		const auto pressed_keys = Helper::get_pressed_keys();
+		for (const auto& key : pressed_keys)
+		{
+			if (machine.registers[payload.X] == (int)key)
+			{
+				machine.pc += INSTRUCTION_SIZE;
+				break;
+			}
+		}
+		break;
+	}
+	case 0xA1:
+	{
+		const auto pressed_keys = Helper::get_pressed_keys();
+		bool key_pressed = false;
+		for (const auto& key : pressed_keys)
+		{
+			if (machine.registers[payload.X] == (int)key)
+			{
+				key_pressed = true;
+				break;
+			}
+		}
+
+		if (!key_pressed)
+		{
+			machine.pc += INSTRUCTION_SIZE;
+		}
+		break;
+	}
+	default:
+		throw exception("skip_cond_key: badly formatted category E instruction.");
+	}
 }
 
 void Executor::category_F(const CHIP_8::Instruction::Instruction_payload& payload)
@@ -228,8 +271,22 @@ void Executor::category_F(const CHIP_8::Instruction::Instruction_payload& payloa
 		machine.registers[payload.X] = machine.delay_timer;
 		break;
 	case 0x0A:
-		// TODO: Implement this
+	{
+		bool key_pressed = false;
+		while (!key_pressed)
+		{
+			for (const auto& [key, code] : CHIP_8_TO_KBD)
+			{
+				if (Keyboard::isKeyPressed(code))
+				{
+					machine.registers[payload.X] = (int)key;
+					key_pressed = true;
+					break;
+				}
+			}
+		}
 		break;
+	}
 	case 0x15:
 		machine.delay_timer = machine.registers[payload.X];
 		break;
@@ -240,17 +297,36 @@ void Executor::category_F(const CHIP_8::Instruction::Instruction_payload& payloa
 		machine.index_register += machine.registers[payload.X];
 		break;
 	case 0x29:
-		// TODO: Implement this
+	{
+		const auto num = machine.registers[payload.X];
+		machine.index_register = FONT_DATA_START_LOCATION + FONT_CHAR_SIZE * num;
 		break;
+	}
 	case 0x33:
-		// TODO: Implement this
+	{
+		const auto digits = get_digits(machine.registers[payload.X]);
+		for (size_t i = 0, sz = digits.size(); i < sz; ++i)
+		{
+			machine.memory[machine.index_register + i] = digits[i];
+		}
 		break;
+	}
 	case 0x55:
-		// TODO: Implement this
+	{
+		for (size_t i = 0, sz = machine.registers.size(); i < sz; ++i)
+		{
+			machine.memory[machine.index_register + i] = machine.registers[i];
+		}
 		break;
+	}
 	case 0x65:
-		// TODO: Implement this
+	{
+		for (size_t i = 0, sz = machine.registers.size(); i < sz; ++i)
+		{
+			machine.registers[i] = machine.memory[machine.index_register + i];
+		}
 		break;
+	}
 	default:
 		throw exception("Invalid category F instruction format.");
 		break;
@@ -271,4 +347,21 @@ void Executor::Helper::return_(CHIP_8& machine)
 
 	const auto return_addr = machine.stack[machine.stack_pointer--];
 	machine.pc = return_addr;
+}
+
+/**
+ * Return the pressed key, Key::None if no key is pressed.
+ */
+vector<Key> Executor::Helper::get_pressed_keys()
+{
+	vector<Key> pressed_keys;
+	for (const auto& [key, code] : CHIP_8_TO_KBD)
+	{
+		if (Keyboard::isKeyPressed(code))
+		{
+			pressed_keys.push_back(key);
+		}
+	}
+
+	return pressed_keys;
 }
