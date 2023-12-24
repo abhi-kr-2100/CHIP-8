@@ -4,7 +4,6 @@
 #include <array>
 #include <functional>
 #include <map>
-#include <chrono>
 
 #include "data-types.hpp"
 #include "font-data.hpp"
@@ -19,6 +18,7 @@ public:
 	bool run_one();
 
 	bool get_pixel_at(size_t x, size_t y) const;
+	void decrement_timers(byte seconds_passed);
 
 	CHIP_8();
 	~CHIP_8();
@@ -65,10 +65,6 @@ private:
 
 	byte delay_timer;
 	byte sound_timer;
-
-	std::chrono::time_point<std::chrono::system_clock> last_timer_check_time;
-
-	void decrement_timers();
 
 	void load_fonts(double_byte start_location, const decltype(FONT_DATA)& font_data);
 	Instruction get_current_instruction() const;

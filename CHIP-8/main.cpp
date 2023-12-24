@@ -2,14 +2,18 @@
 #include <fstream>
 #include <array>
 #include <vector>
+#include <chrono>
 
 #include <SFML/Graphics.hpp>
 
 #include "CHIP-8.hpp"
 #include "helpers.hpp"
 
+using std::chrono::system_clock;
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::seconds;
 using std::cerr;
-using std::cin;
 using std::ifstream;
 using std::array;
 using std::ios;
@@ -73,11 +77,33 @@ int main(int argc, char* argv[])
 		Titlebar | Close
 	};
 	
+	auto last_limiter_check_time = system_clock::now();
+	auto last_timer_check_time = system_clock::now();
 	for (bool rom_running = true; window.isOpen(); )
 	{
-		if (rom_running)
+		const auto curr_time = system_clock::now();
+		const auto time_passed = curr_time - last_limiter_check_time;
+		const auto milliseconds_passed = duration_cast<milliseconds>(time_passed).count();
+
+		if (milliseconds_passed < MILLISECONDS_PER_REFRESH)
+		{
+			continue;
+		}
+		last_limiter_check_time = curr_time;
+
+		for (size_t nins = 0; rom_running && nins < INSTRUCTIONS_PER_REFRESH; ++nins)
 		{
 			rom_running = machine.run_one();
+		}
+
+		const auto timer_curr_time = system_clock::now();
+		const auto timer_time_passed = timer_curr_time - last_timer_check_time;
+		const auto seconds_passed = duration_cast<seconds>(timer_time_passed).count();
+
+		if (seconds_passed >= 1)
+		{
+			machine.decrement_timers(seconds_passed);
+			last_timer_check_time = timer_curr_time;
 		}
 
 		for (Event e; window.pollEvent(e); )
