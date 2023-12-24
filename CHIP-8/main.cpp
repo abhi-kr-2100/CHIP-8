@@ -77,45 +77,53 @@ int main(int argc, char* argv[])
 		Titlebar | Close
 	};
 	
-	auto last_limiter_check_time = system_clock::now();
+	auto last_fps_limiter_check_time = system_clock::now();
+	auto last_exec_limiter_check_time = system_clock::now();
 	auto last_timer_check_time = system_clock::now();
 	for (bool rom_running = true; window.isOpen(); )
 	{
 		const auto curr_time = system_clock::now();
-		const auto time_passed = curr_time - last_limiter_check_time;
-		const auto milliseconds_passed = duration_cast<milliseconds>(time_passed).count();
 
-		if (milliseconds_passed < MILLISECONDS_PER_REFRESH)
+		const auto exec_time_passed = curr_time - last_exec_limiter_check_time;
+		const auto exec_milliseconds_passed = duration_cast<milliseconds>(exec_time_passed).count();
+
+		if (exec_milliseconds_passed >= MILLISECONDS_PER_INSTRUCTION)
 		{
-			continue;
-		}
-		last_limiter_check_time = curr_time;
-
-		for (size_t nins = 0; rom_running && nins < INSTRUCTIONS_PER_REFRESH; ++nins)
-		{
-			rom_running = machine.run_one();
-		}
-
-		const auto timer_curr_time = system_clock::now();
-		const auto timer_time_passed = timer_curr_time - last_timer_check_time;
-		const auto seconds_passed = duration_cast<seconds>(timer_time_passed).count();
-
-		if (seconds_passed >= 1)
-		{
-			machine.decrement_timers(seconds_passed);
-			last_timer_check_time = timer_curr_time;
-		}
-
-		for (Event e; window.pollEvent(e); )
-		{
-			if (e.type == Closed)
+			const auto nins = ceil(double(exec_milliseconds_passed) / MILLISECONDS_PER_INSTRUCTION);
+			for (size_t i = 0; rom_running && i < nins; ++i)
 			{
-				window.close();
+				rom_running = machine.run_one();
 			}
+			last_exec_limiter_check_time = curr_time;
 		}
 
-		const auto frame_buffer = extract_frame_buffer(machine);
-		redraw_if_necessary<SCALING_FACTOR>(window, frame_buffer);
+		const auto timer_time_passed = curr_time - last_timer_check_time;
+		const auto timer_seconds_passed = duration_cast<seconds>(timer_time_passed).count();
+
+		if (timer_seconds_passed)
+		{
+			machine.decrement_timers(timer_seconds_passed);
+			last_timer_check_time = curr_time;
+		}
+
+		const auto fps_time_passed = curr_time - last_fps_limiter_check_time;
+		const auto fps_milliseconds_passed = duration_cast<milliseconds>(fps_time_passed).count();
+
+		if (fps_milliseconds_passed >= MILLISECONDS_PER_REFRESH)
+		{
+			for (Event e; window.pollEvent(e); )
+			{
+				if (e.type == Closed)
+				{
+					window.close();
+				}
+			}
+
+			const auto frame_buffer = extract_frame_buffer(machine);
+			redraw_if_necessary<SCALING_FACTOR>(window, frame_buffer);
+
+			last_fps_limiter_check_time = curr_time;
+		}
 	}
 }
 
