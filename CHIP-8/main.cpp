@@ -64,9 +64,6 @@ int main(int argc, char* argv[])
 		Titlebar | Close
 	};
 
-	auto start_time = system_clock::now();
-	size_t nins_executed = 0, ntimer_updated = 0, nscreen_refreshed = 0;
-	
 	auto last_limiter_check_time = system_clock::now();
 	for (bool rom_running = true; window.isOpen(); )
 	{
@@ -88,11 +85,9 @@ int main(int argc, char* argv[])
 		{
 			rom_running = machine.run_one();
 		}
-		nins_executed += nins;
 
 		const size_t timer_decrements_elapsed = refreshes_elapsed * TIMER_DECREMENTS_PER_REFRESH;
 		machine.decrement_timers(timer_decrements_elapsed);
-		ntimer_updated += timer_decrements_elapsed;
 
 		for (Event e; window.pollEvent(e); )
 		{
@@ -104,15 +99,7 @@ int main(int argc, char* argv[])
 
 		const auto frame_buffer = extract_frame_buffer(machine);
 		redraw_if_necessary<SCALING_FACTOR>(window, frame_buffer);
-
-		nscreen_refreshed += refreshes_elapsed;
 	}
-
-	const auto time_elapsed = system_clock::now() - start_time;
-	const auto seconds_elapsed = duration_cast<seconds>(time_elapsed).count();
-	cerr << "Execution speed: " << (double(nins_executed) / seconds_elapsed) << "\n"
-		<< "Timer speed: " << (double(ntimer_updated) / seconds_elapsed) << "\n"
-		<< "FPS: " << (double(nscreen_refreshed) / seconds_elapsed) << "\n";
 }
 
 bool redraw_necessary(const Frame_buffer& fb)
