@@ -120,12 +120,15 @@ void Executor::operate_and_assign(const CHIP_8::Instruction::Instruction_payload
 		break;
 	case 0x1:
 		machine.registers[payload.X] |= machine.registers[payload.Y];
+		machine.registers[0xF] = 0;
 		break;
 	case 0x2:
 		machine.registers[payload.X] &= machine.registers[payload.Y];
+		machine.registers[0xF] = 0;
 		break;
 	case 0x3:
 		machine.registers[payload.X] ^= machine.registers[payload.Y];
+		machine.registers[0xF] = 0;
 		break;
 	case 0x4:
 	{
