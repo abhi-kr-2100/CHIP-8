@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 	for (size_t i = 0, j = 0, sz = bytes.size(); i < sz; i += INSTRUCTION_SIZE, ++j)
 	{
 		byte first = bytes[i];
-		byte second = bytes[i + 1];
+		byte second = (i + 1 < sz) ? bytes[i + 1] : 0x0;
 
 		instruction_t ins = concatenate_bytes(first, second);
 		program[j] = ins;
