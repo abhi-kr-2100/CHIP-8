@@ -201,6 +201,9 @@ void Executor::draw(const CHIP_8::Instruction::Instruction_payload& payload)
 	const auto x = machine.registers[payload.X];
 	const auto y = machine.registers[payload.Y];
 
+	const auto fb_width = machine.frame_buffer.size();
+	const auto fb_height = machine.frame_buffer[0].size();
+
 	machine.registers[0xf] = 0;
 	for (size_t i = 0; i < payload.N; ++i)
 	{
@@ -210,14 +213,14 @@ void Executor::draw(const CHIP_8::Instruction::Instruction_payload& payload)
 			const auto bit = bits & (1 << (BITS_PER_BYTE - j - 1));
 			if (bit)
 			{
-				machine.frame_buffer[x + j][y + i] = true;
+				machine.frame_buffer[(x + j) % fb_width][(y + i) % fb_height] = true;
 				continue;
 			}
-			if (machine.frame_buffer[x + j][y + i])
+			if (machine.frame_buffer[(x + j) % fb_width][(y + i) % fb_height])
 			{
 				machine.registers[0xf] = 1;
 			}
-			machine.frame_buffer[x + j][y + i] = false;
+			machine.frame_buffer[(x + j) % fb_width][(y + i) % fb_height] = false;
 		}
 	}
 }
