@@ -53,6 +53,13 @@ void CHIP_8::load_program(const ROM& program)
  */
 bool CHIP_8::run_one()
 {
+	if (is_blocked)
+	{
+		// Machine was blocked by the previous instruction. Keep going back to that
+		// previous instruction until machine is unblocked.
+		pc -= INSTRUCTION_SIZE;
+	}
+
 	const auto ins = get_current_instruction();
 	pc += INSTRUCTION_SIZE;
 

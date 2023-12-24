@@ -282,17 +282,14 @@ void Executor::category_F(const CHIP_8::Instruction::Instruction_payload& payloa
 		break;
 	case 0x0A:
 	{
-		bool key_pressed = false;
-		while (!key_pressed)
+		machine.is_blocked = true;
+		for (const auto& [key, code] : CHIP_8_TO_KBD)
 		{
-			for (const auto& [key, code] : CHIP_8_TO_KBD)
+			if (Keyboard::isKeyPressed(code))
 			{
-				if (Keyboard::isKeyPressed(code))
-				{
-					machine.registers[payload.X] = (int)key;
-					key_pressed = true;
-					break;
-				}
+				machine.registers[payload.X] = (int)key;
+				machine.is_blocked = false;
+				break;
 			}
 		}
 		break;

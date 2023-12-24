@@ -66,6 +66,8 @@ private:
 	byte delay_timer;
 	byte sound_timer;
 
+	bool is_blocked;
+
 	void load_fonts(double_byte start_location, const decltype(FONT_DATA)& font_data);
 	Instruction get_current_instruction() const;
 

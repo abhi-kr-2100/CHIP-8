@@ -67,6 +67,14 @@ int main(int argc, char* argv[])
 	auto last_limiter_check_time = system_clock::now();
 	for (bool rom_running = true; window.isOpen(); )
 	{
+		for (Event e; window.pollEvent(e); )
+		{
+			if (e.type == Closed)
+			{
+				window.close();
+			}
+		}
+
 		const auto curr_time = system_clock::now();
 
 		const auto time_elapsed = curr_time - last_limiter_check_time;
@@ -88,14 +96,6 @@ int main(int argc, char* argv[])
 
 		const size_t timer_decrements_elapsed = refreshes_elapsed * TIMER_DECREMENTS_PER_REFRESH;
 		machine.decrement_timers(timer_decrements_elapsed);
-
-		for (Event e; window.pollEvent(e); )
-		{
-			if (e.type == Closed)
-			{
-				window.close();
-			}
-		}
 
 		const auto frame_buffer = extract_frame_buffer(machine);
 		redraw_if_necessary<SCALING_FACTOR>(window, frame_buffer);
