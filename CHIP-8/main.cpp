@@ -30,8 +30,6 @@ using sf::Texture;
 using sf::Uint8;
 using sf::Sprite;
 
-using Frame_buffer = array<array<byte, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH>;
-
 static Frame_buffer extract_frame_buffer(const CHIP_8& machine);
 
 template <size_t SCALING_FACTOR>
