@@ -26,10 +26,18 @@ using sf::Texture;
 using sf::Uint8;
 using sf::Sprite;
 
-static array<array<bool, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH> extract_frame_buffer(const CHIP_8& machine);
+using Frame_buffer = array<array<bool, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH>;
+
+static Frame_buffer extract_frame_buffer(const CHIP_8& machine);
 
 template <size_t SCALING_FACTOR>
-static Texture load_texture_from_frame_buffer(const array<array<bool, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH>& fb);
+static Texture load_texture_from_frame_buffer(const Frame_buffer& fb);
+
+bool redraw_necessary(const Frame_buffer& fb);
+
+template <size_t SCALING_FACTOR>
+void redraw_if_necessary(RenderWindow& window, const Frame_buffer& fb);
+
 
 int main(int argc, char* argv[])
 {
@@ -64,7 +72,6 @@ int main(int argc, char* argv[])
 		"CHIP-8",
 		Titlebar | Close
 	};
-	window.setFramerateLimit(60);
 	
 	for (bool rom_running = true; window.isOpen(); )
 	{
@@ -82,20 +89,50 @@ int main(int argc, char* argv[])
 		}
 
 		const auto frame_buffer = extract_frame_buffer(machine);
-		const auto screen_texture = load_texture_from_frame_buffer<SCALING_FACTOR>(frame_buffer);
-
-		auto screen_sprite = Sprite{ screen_texture };
-
-		window.clear(Color::Black);
-		window.draw(screen_sprite);
-		window.display();
+		redraw_if_necessary<SCALING_FACTOR>(window, frame_buffer);
 	}
 }
 
-static array<array<bool, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH>
-extract_frame_buffer(const CHIP_8& machine)
+bool redraw_necessary(const Frame_buffer& fb)
 {
-	array<array<bool, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH> fb{};
+	static Frame_buffer previous_fb{};
+
+	bool necessary = false;
+	for (size_t x = 0; x < fb.size(); ++x)
+	{
+		for (size_t y = 0; y < fb[0].size(); ++y)
+		{
+			if (previous_fb[x][y] != fb[x][y])
+			{
+				necessary = true;
+			}
+
+			previous_fb[x][y] = fb[x][y];
+		}
+	}
+
+	return necessary;
+}
+
+template <size_t SCALING_FACTOR>
+void redraw_if_necessary(RenderWindow& window, const Frame_buffer& fb)
+{
+	if (!redraw_necessary(fb))
+	{
+		return;
+	}
+
+	const auto screen_texture = load_texture_from_frame_buffer<SCALING_FACTOR>(fb);
+	const auto screen_sprite = Sprite{ screen_texture };
+
+	window.clear();
+	window.draw(screen_sprite);
+	window.display();
+}
+
+static Frame_buffer extract_frame_buffer(const CHIP_8& machine)
+{
+	Frame_buffer fb{};
 	for (size_t x = 0; x < FRAME_BUFFER_WIDTH; ++x)
 	{
 		for (size_t y = 0; y < FRAME_BUFFER_HEIGHT; ++y)
@@ -108,8 +145,7 @@ extract_frame_buffer(const CHIP_8& machine)
 }
 
 template <size_t SCALING_FACTOR>
-static Texture
-load_texture_from_frame_buffer(const array<array<bool, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH>& fb)
+static Texture load_texture_from_frame_buffer(const Frame_buffer& fb)
 {
 	constexpr auto NUM_CHANNELS = 4;
 	constexpr auto OPAQUE = 255;
