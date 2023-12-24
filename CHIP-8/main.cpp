@@ -80,55 +80,45 @@ int main(int argc, char* argv[])
 	auto start_time = system_clock::now();
 	size_t nins_executed = 0, ntimer_updated = 0, nscreen_refreshed = 0;
 	
-	auto last_fps_limiter_check_time = system_clock::now();
-	auto last_exec_limiter_check_time = system_clock::now();
-	auto last_timer_check_time = system_clock::now();
+	auto last_limiter_check_time = system_clock::now();
 	for (bool rom_running = true; window.isOpen(); )
 	{
 		const auto curr_time = system_clock::now();
 
-		const auto exec_time_passed = curr_time - last_exec_limiter_check_time;
-		const auto exec_milliseconds_passed = duration_cast<milliseconds>(exec_time_passed).count();
+		const auto time_elapsed = curr_time - last_limiter_check_time;
+		const auto milliseconds_elapsed = duration_cast<milliseconds>(time_elapsed).count();
 
-		if (exec_milliseconds_passed >= MILLISECONDS_PER_INSTRUCTION)
+		if (milliseconds_elapsed < MILLISECONDS_PER_REFRESH)
 		{
-			const auto nins = ceil(double(exec_milliseconds_passed) / MILLISECONDS_PER_INSTRUCTION);
-			for (size_t i = 0; rom_running && i < nins; ++i)
+			continue;
+		}
+		last_limiter_check_time = curr_time;
+
+		const auto refreshes_elapsed = milliseconds_elapsed / MILLISECONDS_PER_REFRESH;
+
+		const size_t nins = refreshes_elapsed * INSTRUCTIONS_PER_REFRESH;
+		for (size_t i = 0; rom_running && i < nins; ++i)
+		{
+			rom_running = machine.run_one();
+		}
+		nins_executed += nins;
+
+		const size_t timer_decrements_elapsed = refreshes_elapsed * TIMER_DECREMENTS_PER_REFRESH;
+		machine.decrement_timers(timer_decrements_elapsed);
+		ntimer_updated += timer_decrements_elapsed;
+
+		for (Event e; window.pollEvent(e); )
+		{
+			if (e.type == Closed)
 			{
-				rom_running = machine.run_one();
-				++nins_executed;
+				window.close();
 			}
-			last_exec_limiter_check_time = curr_time;
 		}
 
-		const auto timer_time_passed = curr_time - last_timer_check_time;
-		const auto timer_seconds_passed = duration_cast<seconds>(timer_time_passed).count();
+		const auto frame_buffer = extract_frame_buffer(machine);
+		redraw_if_necessary<SCALING_FACTOR>(window, frame_buffer);
 
-		if (timer_seconds_passed)
-		{
-			machine.decrement_timers(timer_seconds_passed);
-			++ntimer_updated;
-			last_timer_check_time = curr_time;
-		}
-
-		const auto fps_time_passed = curr_time - last_fps_limiter_check_time;
-		const auto fps_milliseconds_passed = duration_cast<milliseconds>(fps_time_passed).count();
-
-		if (fps_milliseconds_passed >= MILLISECONDS_PER_REFRESH)
-		{
-			for (Event e; window.pollEvent(e); )
-			{
-				if (e.type == Closed)
-				{
-					window.close();
-				}
-			}
-
-			const auto frame_buffer = extract_frame_buffer(machine);
-			redraw_if_necessary<SCALING_FACTOR>(window, frame_buffer);
-			++nscreen_refreshed;
-			last_fps_limiter_check_time = curr_time;
-		}
+		nscreen_refreshed += refreshes_elapsed;
 	}
 
 	const auto time_elapsed = system_clock::now() - start_time;
