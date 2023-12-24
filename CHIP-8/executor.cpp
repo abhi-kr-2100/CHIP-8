@@ -345,7 +345,7 @@ void Executor::Helper::return_(CHIP_8& machine)
 		throw exception("return_: no address to return to.");
 	}
 
-	const auto return_addr = machine.stack[machine.stack_pointer--];
+	const double_byte return_addr = machine.stack[--machine.stack_pointer];
 	machine.pc = return_addr;
 }
 
