@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
 	{
 	}
 
-	array<instruction_t, MAX_NUM_INSTRUCTIONS> program{};
+	ROM program{};
 	for (size_t i = 0, j = 0, sz = bytes.size(); i < sz; i += INSTRUCTION_SIZE, ++j)
 	{
 		byte first = bytes[i];

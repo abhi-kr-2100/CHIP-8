@@ -14,7 +14,7 @@ class Executor;
 class CHIP_8
 {
 public:
-	void load_program(const std::array<instruction_t, MAX_NUM_INSTRUCTIONS>& program);
+	void load_program(const ROM& program);
 	bool run_one();
 
 	byte get_pixel_at(size_t x, size_t y) const;
@@ -57,7 +57,7 @@ private:
 	std::array<byte, NUM_REGISTERS> registers;
 	std::array<double_byte, STACK_SIZE / STACK_ENTRY_SIZE> stack;
 
-	std::array<std::array<byte, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH> frame_buffer;
+	Frame_buffer frame_buffer;
 
 	double_byte pc;
 	double_byte index_register;

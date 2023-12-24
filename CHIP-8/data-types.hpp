@@ -10,3 +10,4 @@ using double_byte = std::uint16_t;
 using instruction_t = double_byte;
 
 using Frame_buffer = std::array<std::array<byte, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH>;
+using ROM = std::array<instruction_t, MAX_NUM_INSTRUCTIONS>;

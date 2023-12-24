@@ -27,8 +27,7 @@ CHIP_8::~CHIP_8()
 	delete executor;
 }
 
-void CHIP_8::load_program(const std::array<instruction_t,
-		MAX_NUM_INSTRUCTIONS>& program)
+void CHIP_8::load_program(const ROM& program)
 {
 	for (size_t ins_ctr = 0, mem_ctr = 0; ins_ctr < MAX_NUM_INSTRUCTIONS;
 			++ins_ctr, mem_ctr += INSTRUCTION_SIZE)
