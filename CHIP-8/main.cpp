@@ -18,6 +18,7 @@ using std::ifstream;
 using std::array;
 using std::ios;
 using std::vector;
+using std::istream;
 
 using sf::RenderWindow;
 using sf::VideoMode;
@@ -40,6 +41,7 @@ bool redraw_necessary(const Frame_buffer& fb);
 template <size_t SCALING_FACTOR>
 void redraw_if_necessary(RenderWindow& window, const Frame_buffer& fb);
 
+ROM load_program_from_stream(istream& stream);
 
 int main(int argc, char* argv[])
 {
@@ -50,21 +52,8 @@ int main(int argc, char* argv[])
 	}
 
 	ifstream rom{ argv[1], ios::binary };
-	vector<unsigned char> bytes;
-	for (int byte = 0; (byte = rom.get()), !rom.eof(); bytes.push_back(byte))
-	{
-	}
-
-	ROM program{};
-	for (size_t i = 0, j = 0, sz = bytes.size(); i < sz; i += INSTRUCTION_SIZE, ++j)
-	{
-		byte first = bytes[i];
-		byte second = (i + 1 < sz) ? bytes[i + 1] : 0x0;
-
-		instruction_t ins = concatenate_bytes(first, second);
-		program[j] = ins;
-	}
-
+	const auto program = load_program_from_stream(rom);
+	
 	CHIP_8 machine;
 	machine.load_program(program);
 
@@ -213,4 +202,24 @@ static Texture load_texture_from_frame_buffer(const Frame_buffer& fb)
 	texture.update(pixels);
 
 	return texture;
+}
+
+ROM load_program_from_stream(istream& stream)
+{
+	vector<unsigned char> bytes;
+	for (int byte = 0; (byte = stream.get()), !stream.eof(); bytes.push_back(byte))
+	{
+	}
+
+	ROM program{};
+	for (size_t i = 0, j = 0, sz = bytes.size(); i < sz; i += INSTRUCTION_SIZE, ++j)
+	{
+		byte first = bytes[i];
+		byte second = (i + 1 < sz) ? bytes[i + 1] : 0x0;
+
+		instruction_t ins = concatenate_bytes(first, second);
+		program[j] = ins;
+	}
+
+	return program;
 }
