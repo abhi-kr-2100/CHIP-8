@@ -144,8 +144,8 @@ void Executor::operate_and_assign(const CHIP_8::Instruction::Instruction_payload
 	case 0x6:
 	{
 		const auto lsb = get_least_significant_bit(machine.registers[payload.X]);
-		machine.registers[0xF] = lsb;
 		machine.registers[payload.X] >>= 1;
+		machine.registers[0xF] = lsb;
 		break;
 	}
 	case 0x7:
@@ -158,8 +158,8 @@ void Executor::operate_and_assign(const CHIP_8::Instruction::Instruction_payload
 	case 0xE:
 	{
 		const auto msb = get_most_significant_bit(machine.registers[payload.X]);
-		machine.registers[0xF] = msb;
 		machine.registers[payload.X] <<= 1;
+		machine.registers[0xF] = msb;
 		break;
 	}
 	default:
@@ -204,7 +204,7 @@ void Executor::draw(const CHIP_8::Instruction::Instruction_payload& payload)
 	const auto fb_width = machine.frame_buffer.size();
 	const auto fb_height = machine.frame_buffer[0].size();
 
-	machine.registers[0xf] = 0;
+	byte vf_flag_val = 0;
 	for (size_t i = 0; i < payload.N; ++i)
 	{
 		const auto bits = machine.memory[machine.index_register + i];
@@ -218,11 +218,13 @@ void Executor::draw(const CHIP_8::Instruction::Instruction_payload& payload)
 			}
 			if (machine.frame_buffer[(x + j) % fb_width][(y + i) % fb_height])
 			{
-				machine.registers[0xf] = 1;
+				vf_flag_val = 1;
 			}
 			machine.frame_buffer[(x + j) % fb_width][(y + i) % fb_height] = false;
 		}
 	}
+
+	machine.registers[0xF] = vf_flag_val;
 }
 
 void Executor::skip_cond_key(const CHIP_8::Instruction::Instruction_payload& payload)
