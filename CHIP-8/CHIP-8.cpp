@@ -3,18 +3,23 @@
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>
+#include <chrono>
 
 #include "CHIP-8.hpp"
 #include "helpers.hpp"
 #include "executor.hpp"
 
+using std::max;
 using std::pow;
 using std::cin;
 using std::exception;
 using std::rand;
+using std::chrono::system_clock;
+using std::chrono::duration_cast;
+using std::chrono::seconds;
 
 CHIP_8::CHIP_8()
-	: pc{PROGRAM_DATA_START_LOCATION}, executor{new Executor(*this)}
+	: pc{PROGRAM_DATA_START_LOCATION}, executor{new Executor(*this)}, last_timer_check_time{system_clock::now()}
 {
 	memory.fill(0);
 	registers.fill(0);
@@ -56,6 +61,8 @@ void CHIP_8::load_program(const std::array<instruction_t,
  */
 bool CHIP_8::run_one()
 {
+	decrement_timers();
+
 	const auto ins = get_current_instruction();
 	pc += INSTRUCTION_SIZE;
 
@@ -126,4 +133,19 @@ bool CHIP_8::get_pixel_at(size_t x, size_t y) const
 	}
 
 	return frame_buffer.at(x).at(y);
+}
+
+void CHIP_8::decrement_timers()
+{
+	const auto current_time = system_clock::now();
+	const auto time_passed = current_time - last_timer_check_time;
+	const auto seconds_passed = duration_cast<seconds>(time_passed).count();
+
+	delay_timer = max(0LL, delay_timer - seconds_passed);
+	sound_timer = max(0LL, sound_timer - seconds_passed);
+
+	if (seconds_passed)
+	{
+		last_timer_check_time = system_clock::now();
+	}
 }

@@ -4,6 +4,7 @@
 #include <array>
 #include <functional>
 #include <map>
+#include <chrono>
 
 #include "data-types.hpp"
 #include "font-data.hpp"
@@ -64,6 +65,10 @@ private:
 
 	byte delay_timer;
 	byte sound_timer;
+
+	std::chrono::time_point<std::chrono::system_clock> last_timer_check_time;
+
+	void decrement_timers();
 
 	void load_fonts(double_byte start_location, const decltype(FONT_DATA)& font_data);
 	Instruction get_current_instruction() const;
