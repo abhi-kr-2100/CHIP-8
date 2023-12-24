@@ -313,7 +313,7 @@ void Executor::category_F(const CHIP_8::Instruction::Instruction_payload& payloa
 	}
 	case 0x55:
 	{
-		for (size_t i = 0, sz = machine.registers.size(); i < sz; ++i)
+		for (size_t i = 0; i <= payload.X; ++i)
 		{
 			machine.memory[machine.index_register + i] = machine.registers[i];
 		}
@@ -321,7 +321,7 @@ void Executor::category_F(const CHIP_8::Instruction::Instruction_payload& payloa
 	}
 	case 0x65:
 	{
-		for (size_t i = 0, sz = machine.registers.size(); i < sz; ++i)
+		for (size_t i = 0; i <= payload.X; ++i)
 		{
 			machine.registers[i] = machine.memory[machine.index_register + i];
 		}
