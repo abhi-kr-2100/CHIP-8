@@ -216,16 +216,16 @@ void Executor::draw(const CHIP_8::Instruction::Instruction_payload& payload)
 		for (size_t j = 0; j < BITS_PER_BYTE; ++j)
 		{
 			const auto bit = bits & (1 << (BITS_PER_BYTE - j - 1));
-			if (bit)
+			if (!bit)
 			{
-				machine.frame_buffer[(x + j) % fb_width][(y + i) % fb_height] = true;
+				machine.frame_buffer[(x + j) % fb_width][(y + i) % fb_height] ^= 0;
 				continue;
 			}
 			if (machine.frame_buffer[(x + j) % fb_width][(y + i) % fb_height])
 			{
 				vf_flag_val = 1;
 			}
-			machine.frame_buffer[(x + j) % fb_width][(y + i) % fb_height] = false;
+			machine.frame_buffer[(x + j) % fb_width][(y + i) % fb_height] ^= 1;
 		}
 	}
 

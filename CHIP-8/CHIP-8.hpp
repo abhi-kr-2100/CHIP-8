@@ -17,7 +17,7 @@ public:
 	void load_program(const std::array<instruction_t, MAX_NUM_INSTRUCTIONS>& program);
 	bool run_one();
 
-	bool get_pixel_at(size_t x, size_t y) const;
+	byte get_pixel_at(size_t x, size_t y) const;
 	void decrement_timers(byte times);
 
 	CHIP_8();
@@ -57,7 +57,7 @@ private:
 	std::array<byte, NUM_REGISTERS> registers;
 	std::array<double_byte, STACK_SIZE / STACK_ENTRY_SIZE> stack;
 
-	std::array<std::array<bool, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH> frame_buffer;
+	std::array<std::array<byte, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH> frame_buffer;
 
 	double_byte pc;
 	double_byte index_register;

@@ -116,7 +116,7 @@ CHIP_8::Instruction CHIP_8::get_current_instruction() const
 	};
 }
 
-bool CHIP_8::get_pixel_at(size_t x, size_t y) const
+byte CHIP_8::get_pixel_at(size_t x, size_t y) const
 {
 	if (x >= frame_buffer.size() || y >= frame_buffer[0].size())
 	{

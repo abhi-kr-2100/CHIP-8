@@ -30,7 +30,7 @@ using sf::Texture;
 using sf::Uint8;
 using sf::Sprite;
 
-using Frame_buffer = array<array<bool, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH>;
+using Frame_buffer = array<array<byte, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH>;
 
 static Frame_buffer extract_frame_buffer(const CHIP_8& machine);
 
@@ -193,7 +193,7 @@ static Texture load_texture_from_frame_buffer(const Frame_buffer& fb)
 	{
 		for (size_t y = 0; y < FRAME_BUFFER_HEIGHT; ++y)
 		{
-			const auto is_black = fb[x][y];
+			const bool is_black = fb[x][y];
 
 			const auto startx = x * SCALING_FACTOR;
 			const auto starty = y * SCALING_FACTOR;
