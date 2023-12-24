@@ -90,9 +90,6 @@ int main(int argc, char* argv[])
 		window.draw(screen_sprite);
 		window.display();
 	}
-
-	cerr << "Press enter to exit...";
-	cin.get();
 }
 
 static array<array<bool, FRAME_BUFFER_HEIGHT>, FRAME_BUFFER_WIDTH>
