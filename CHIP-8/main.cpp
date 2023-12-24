@@ -76,6 +76,9 @@ int main(int argc, char* argv[])
 		"CHIP-8",
 		Titlebar | Close
 	};
+
+	auto start_time = system_clock::now();
+	size_t nins_executed = 0, ntimer_updated = 0, nscreen_refreshed = 0;
 	
 	auto last_fps_limiter_check_time = system_clock::now();
 	auto last_exec_limiter_check_time = system_clock::now();
@@ -93,6 +96,7 @@ int main(int argc, char* argv[])
 			for (size_t i = 0; rom_running && i < nins; ++i)
 			{
 				rom_running = machine.run_one();
+				++nins_executed;
 			}
 			last_exec_limiter_check_time = curr_time;
 		}
@@ -103,6 +107,7 @@ int main(int argc, char* argv[])
 		if (timer_seconds_passed)
 		{
 			machine.decrement_timers(timer_seconds_passed);
+			++ntimer_updated;
 			last_timer_check_time = curr_time;
 		}
 
@@ -121,10 +126,16 @@ int main(int argc, char* argv[])
 
 			const auto frame_buffer = extract_frame_buffer(machine);
 			redraw_if_necessary<SCALING_FACTOR>(window, frame_buffer);
-
+			++nscreen_refreshed;
 			last_fps_limiter_check_time = curr_time;
 		}
 	}
+
+	const auto time_elapsed = system_clock::now() - start_time;
+	const auto seconds_elapsed = duration_cast<seconds>(time_elapsed).count();
+	cerr << "Execution speed: " << (double(nins_executed) / seconds_elapsed) << "\n"
+		<< "Timer speed: " << (double(ntimer_updated) / seconds_elapsed) << "\n"
+		<< "FPS: " << (double(nscreen_refreshed) / seconds_elapsed) << "\n";
 }
 
 bool redraw_necessary(const Frame_buffer& fb)
