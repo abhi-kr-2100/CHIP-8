@@ -126,8 +126,8 @@ bool CHIP_8::get_pixel_at(size_t x, size_t y) const
 	return frame_buffer.at(x).at(y);
 }
 
-void CHIP_8::decrement_timers(byte seconds_passed)
+void CHIP_8::decrement_timers(byte times)
 {
-	delay_timer = seconds_passed >= delay_timer ? 0 : (delay_timer - seconds_passed);
-	sound_timer = seconds_passed >= sound_timer ? 0 : (sound_timer - seconds_passed);
+	delay_timer = times >= delay_timer ? 0 : (delay_timer - times);
+	sound_timer = times >= sound_timer ? 0 : (sound_timer - times);
 }

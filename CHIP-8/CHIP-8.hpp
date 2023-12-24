@@ -18,7 +18,7 @@ public:
 	bool run_one();
 
 	bool get_pixel_at(size_t x, size_t y) const;
-	void decrement_timers(byte seconds_passed);
+	void decrement_timers(byte times);
 
 	CHIP_8();
 	~CHIP_8();
