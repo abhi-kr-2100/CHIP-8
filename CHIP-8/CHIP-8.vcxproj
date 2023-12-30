@@ -139,7 +139,6 @@
     <ClInclude Include="data-types.hpp" />
     <ClInclude Include="executor.hpp" />
     <ClInclude Include="keyboard.hpp" />
-    <ClInclude Include="keyboard-data.hpp" />
     <ClInclude Include="helpers.hpp" />
     <ClInclude Include="machine-specs.hpp" />
   </ItemGroup>

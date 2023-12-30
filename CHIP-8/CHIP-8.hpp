@@ -22,36 +22,6 @@ public:
 
 	CHIP_8();
 	~CHIP_8();
-
-	/**
-	 * A CHIP-8 instruction is 2 bytes (or 4 nibbles) long, and can be
-	 * represented using 4 hexadecimal digits (one for each nibble).
-	 *
-	 * The leftmost digit is the category which determines how the
-	 * remaining 3 digits are interpreted.
-	 *
-	 * The various interpretations of the other nibbles are as follows:
-	 * - X: the 2nd nibble
-	 * - Y: the 3rd nibble
-	 * - N: the 4th nibble
-	 * - NN: the 2nd byte
-	 * - NNN: the 2nd, 3rd, and the 4th nibbles
-	 */
-	static struct Instruction
-	{
-		static struct Instruction_payload
-		{
-			byte X;
-			byte Y;
-			byte N;
-			byte NN;
-			double_byte NNN;
-		};
-
-		instruction_t raw_instruction;
-		byte category;
-		Instruction_payload payload;
-	};
 private:
 	std::array<byte, MEMORY_SIZE> memory;
 	std::array<byte, NUM_REGISTERS> registers;

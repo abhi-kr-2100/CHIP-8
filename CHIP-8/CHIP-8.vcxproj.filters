@@ -33,9 +33,6 @@
     <ClInclude Include="executor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="keyboard-data.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="keyboard.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

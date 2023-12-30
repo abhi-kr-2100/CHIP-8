@@ -93,7 +93,7 @@ CHIP_8::load_fonts(double_byte start_loc, const decltype(FONT_DATA)& fonts)
 	}
 }
 
-CHIP_8::Instruction CHIP_8::get_current_instruction() const
+Instruction CHIP_8::get_current_instruction() const
 {
 	// A CHIP-8 insturction is 2 bytes long; hence `pc + 1`.
 	if (pc + 1 >= memory.size())

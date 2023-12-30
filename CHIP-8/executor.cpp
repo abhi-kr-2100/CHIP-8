@@ -26,12 +26,12 @@ Executor::Executor(CHIP_8& machine)
 {
 }
 
-void Executor::execute(const CHIP_8::Instruction& ins)
+void Executor::execute(const Instruction& ins)
 {
 	(this->*executors[ins.category])(ins.payload);
 }
 
-void Executor::category_0(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::category_0(const Instruction::Instruction_payload& payload)
 {
 	if (payload.X == 0x0 && payload.Y == 0xE && payload.N == 0x0)
 	{
@@ -47,7 +47,7 @@ void Executor::category_0(const CHIP_8::Instruction::Instruction_payload& payloa
 	}
 }
 
-void Executor::jump(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::jump(const Instruction::Instruction_payload& payload)
 {
 	if (payload.NNN >= machine.memory.size())
 	{
@@ -57,7 +57,7 @@ void Executor::jump(const CHIP_8::Instruction::Instruction_payload& payload)
 	machine.pc = payload.NNN;
 }
 
-void Executor::subroutine_call(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::subroutine_call(const Instruction::Instruction_payload& payload)
 {
 	if (payload.NNN >= machine.memory.size())
 	{
@@ -73,7 +73,7 @@ void Executor::subroutine_call(const CHIP_8::Instruction::Instruction_payload& p
 	machine.pc = payload.NNN;
 }
 
-void Executor::skip_if_vx_eq_nn(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::skip_if_vx_eq_nn(const Instruction::Instruction_payload& payload)
 {
 	if (machine.registers[payload.X] == payload.NN)
 	{
@@ -81,7 +81,7 @@ void Executor::skip_if_vx_eq_nn(const CHIP_8::Instruction::Instruction_payload& 
 	}
 }
 
-void Executor::skip_if_vx_neq_nn(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::skip_if_vx_neq_nn(const Instruction::Instruction_payload& payload)
 {
 	if (machine.registers[payload.X] != payload.NN)
 	{
@@ -89,7 +89,7 @@ void Executor::skip_if_vx_neq_nn(const CHIP_8::Instruction::Instruction_payload&
 	}
 }
 
-void Executor::skip_if_vx_eq_vy(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::skip_if_vx_eq_vy(const Instruction::Instruction_payload& payload)
 {
 	if (payload.N != 0)
 	{
@@ -102,17 +102,17 @@ void Executor::skip_if_vx_eq_vy(const CHIP_8::Instruction::Instruction_payload& 
 	}
 }
 
-void Executor::set_register(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::set_register(const Instruction::Instruction_payload& payload)
 {
 	machine.registers[payload.X] = payload.NN;
 }
 
-void Executor::inc_reg_by_const(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::inc_reg_by_const(const Instruction::Instruction_payload& payload)
 {
 	machine.registers[payload.X] += payload.NN;
 }
 
-void Executor::operate_and_assign(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::operate_and_assign(const Instruction::Instruction_payload& payload)
 {
 	switch (payload.N)
 	{
@@ -173,7 +173,7 @@ void Executor::operate_and_assign(const CHIP_8::Instruction::Instruction_payload
 	}
 }
 
-void Executor::skip_if_vx_neq_vy(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::skip_if_vx_neq_vy(const Instruction::Instruction_payload& payload)
 {
 	if (payload.N != 0)
 	{
@@ -186,23 +186,23 @@ void Executor::skip_if_vx_neq_vy(const CHIP_8::Instruction::Instruction_payload&
 	}
 }
 
-void Executor::set_index_register(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::set_index_register(const Instruction::Instruction_payload& payload)
 {
 	machine.index_register = payload.NNN;
 }
 
-void Executor::jump_with_offset(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::jump_with_offset(const Instruction::Instruction_payload& payload)
 {
 	machine.pc = machine.registers[0] + payload.NNN;
 }
 
-void Executor::set_random(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::set_random(const Instruction::Instruction_payload& payload)
 {
 	const auto random = rand() % (int)pow(2, BITS_PER_BYTE);
 	machine.registers[payload.X] = random & payload.NN;
 }
 
-void Executor::draw(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::draw(const Instruction::Instruction_payload& payload)
 {
 	const auto x = machine.registers[payload.X];
 	const auto y = machine.registers[payload.Y];
@@ -233,7 +233,7 @@ void Executor::draw(const CHIP_8::Instruction::Instruction_payload& payload)
 	machine.registers[0xF] = vf_flag_val;
 }
 
-void Executor::skip_cond_key(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::skip_cond_key(const Instruction::Instruction_payload& payload)
 {
 	switch (payload.NN)
 	{
@@ -274,7 +274,7 @@ void Executor::skip_cond_key(const CHIP_8::Instruction::Instruction_payload& pay
 	}
 }
 
-void Executor::category_F(const CHIP_8::Instruction::Instruction_payload& payload)
+void Executor::category_F(const Instruction::Instruction_payload& payload)
 {
 	switch (payload.NN)
 	{

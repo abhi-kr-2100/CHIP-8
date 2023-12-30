@@ -7,12 +7,12 @@
 /**
  * CHIP-8 had prebuilt sprites to represent single hexadecimal digits: from 0 to F.
  * This header provides an encoding of these digits.
- * 
+ *
  * Source: http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#font
  */
 
 constexpr auto FONT_CHAR_SIZE = 5 /* bytes */;
-constexpr auto FONT_NUM_CHARS = 16; /* 0x0 to 0xF */
+constexpr auto FONT_NUM_CHARS = 16; /* number of characters in this font: 0x0 to 0xF */
 
 constexpr std::array<byte, FONT_CHAR_SIZE> FONT_DATA_0 = { 0xF0, 0x90, 0x90, 0x90, 0xF0, };
 constexpr std::array<byte, FONT_CHAR_SIZE> FONT_DATA_1 = { 0x20, 0x60, 0x20, 0x20, 0x70, };
