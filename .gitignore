@@ -365,3 +365,4 @@ FodyWeavers.xsd
 /vcpkg_installed/vcpkg
 /Frontend-C++-SFML/vcpkg_installed/x64-windows
 /Python-Frontend/vcpkg_installed
+/Python-Frontend/CHIP8/PyCHIP8.cp312-win_amd64.pyd
