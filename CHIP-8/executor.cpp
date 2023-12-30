@@ -1,7 +1,9 @@
-#include <stdexcept>
+#include <exception>
 #include <vector>
+#include <cstdlib>
+#include <cmath>
 
-#include <SFML/Window.hpp>
+#include <SFML/Window/Keyboard.hpp>
 
 #include "executor.hpp"
 #include "CHIP-8.hpp"
@@ -9,6 +11,8 @@
 
 using std::exception;
 using std::vector;
+using std::pow;
+using std::rand;
 
 using sf::Keyboard;
 

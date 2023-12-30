@@ -1,9 +1,6 @@
 #pragma once
 
-#include <cstdint>
 #include <array>
-#include <functional>
-#include <map>
 
 #include "data-types.hpp"
 #include "font-data.hpp"

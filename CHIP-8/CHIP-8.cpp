@@ -1,12 +1,13 @@
-#include <cassert>
-#include <iostream>
-#include <cmath>
 #include <cstdlib>
-#include <stdexcept>
+#include <exception>
+#include <cassert>
 
 #include "CHIP-8.hpp"
 #include "helpers.hpp"
 #include "executor.hpp"
+#include "machine-specs.hpp"
+#include "font-data.hpp"
+#include "data-types.hpp"
 
 using std::exception;
 using std::rand;
@@ -116,9 +117,7 @@ CHIP_8::Instruction CHIP_8::get_current_instruction() const
 	{
 		ins,
 		category,
-		{
-			X, Y, N, NN, NNN
-	},
+		{ X, Y, N, NN, NNN },
 	};
 }
 

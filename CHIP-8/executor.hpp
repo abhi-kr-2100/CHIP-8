@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <array>
 
 #include "CHIP-8.hpp"
 #include "keyboard-data.hpp"

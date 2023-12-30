@@ -8,6 +8,8 @@
 
 #include "CHIP-8.hpp"
 #include "helpers.hpp"
+#include "data-types.hpp"
+#include "machine-specs.hpp"
 
 using std::chrono::system_clock;
 using std::chrono::duration_cast;
@@ -95,7 +97,7 @@ int main(int argc, char* argv[])
 		const size_t timer_decrements_elapsed = refreshes_elapsed * TIMER_DECREMENTS_PER_REFRESH;
 		machine.decrement_timers(timer_decrements_elapsed);
 
-		const auto frame_buffer = machine.get_frame_buffer();
+		const auto& frame_buffer = machine.get_frame_buffer();
 		redraw_if_necessary<SCALING_FACTOR>(window, frame_buffer);
 	}
 }

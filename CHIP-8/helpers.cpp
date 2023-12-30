@@ -1,7 +1,10 @@
 #include <vector>
+#include <cassert>
 #include <algorithm>
 
 #include "helpers.hpp"
+#include "machine-specs.hpp"
+#include "data-types.hpp"
 
 using std::vector;
 using std::reverse;
@@ -49,7 +52,7 @@ double_byte get_nibbles_in_range(double_byte b, int first, int last)
 vector<int> get_digits(size_t num)
 {
 	vector<int> digits;
-	
+
 	for (; num != 0; num /= 10)
 	{
 		const auto d = num % 10;

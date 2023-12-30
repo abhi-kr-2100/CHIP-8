@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include <SFML/Window.hpp>
+#include <SFML/Window/Keyboard.hpp>
 
 enum class Key
 {
