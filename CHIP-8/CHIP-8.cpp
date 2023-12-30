@@ -73,16 +73,16 @@ bool CHIP_8::run_one()
 void
 CHIP_8::load_fonts(double_byte start_loc, const decltype(FONT_DATA)& fonts)
 {
-	const auto nfont = fonts.size();
-	const auto fontsz = fonts[0].size();
+	const auto num_characters = fonts.size();
+	const auto character_size = fonts[0].size();
 
-	for (size_t font_ctr = 0; font_ctr < nfont; ++font_ctr)
+	for (size_t char_i = 0; char_i < num_characters; ++char_i)
 	{
-		for (size_t byte_ctr = 0; byte_ctr < fontsz; ++byte_ctr)
+		const auto char_start_loc = start_loc + char_i * character_size;
+		for (size_t byte_i = 0; byte_i < character_size; ++byte_i)
 		{
-			const auto insert_loc = start_loc + font_ctr * fontsz + byte_ctr;
-			assert(insert_loc < memory.size());
-			memory[insert_loc] = fonts[font_ctr][byte_ctr];
+			const auto insert_loc = char_start_loc + byte_i;
+			memory[insert_loc] = fonts[char_i][byte_i];
 		}
 	}
 }
