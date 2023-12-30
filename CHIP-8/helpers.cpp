@@ -1,5 +1,5 @@
 #include <vector>
-#include <cassert>
+#include <exception>
 #include <algorithm>
 
 #include "helpers.hpp"
@@ -8,6 +8,7 @@
 
 using std::vector;
 using std::reverse;
+using std::exception;
 
 double_byte concatenate_bytes(byte b1, byte b2)
 {
@@ -28,14 +29,21 @@ double_byte get_nibbles_in_range(double_byte b, int first, int last)
 	constexpr auto NIBBLES_PER_BYTE = BITS_PER_BYTE / BITS_PER_NIBBLE;
 	constexpr auto NIBBLES_PER_DOUBLE_BYTE = 2 * NIBBLES_PER_BYTE;
 
-	assert(last < NIBBLES_PER_DOUBLE_BYTE);
+	if (last >= NIBBLES_PER_DOUBLE_BYTE)
+	{
+		throw exception("get_nibbles_in_range: requested interval is out of range for a double byte");
+	}
+
 	// shift so that all useless nibbles on the right are discarded
 	// bits are useless if they occur after `last`
 	b >>= (NIBBLES_PER_DOUBLE_BYTE - last - 1) * BITS_PER_NIBBLE;
 
 	const auto num_nibbles_to_extract = last - first + 1;
-	assert(num_nibbles_to_extract <= NIBBLES_PER_DOUBLE_BYTE);
-	assert(num_nibbles_to_extract > 0);
+
+	if (num_nibbles_to_extract <= 0 || num_nibbles_to_extract > NIBBLES_PER_DOUBLE_BYTE)
+	{
+		throw exception("get_nibbles_in_range: number of requested nibbles is too small or too large.");
+	}
 
 	// To set bits not in range to 0, we need a mask.
 	// Notice that if we have 0x0ABC and we want to keep the last two nibbles,

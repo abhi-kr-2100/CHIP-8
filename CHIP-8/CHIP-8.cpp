@@ -1,6 +1,5 @@
 #include <cstdlib>
 #include <exception>
-#include <cassert>
 
 #include "CHIP-8.hpp"
 #include "helpers.hpp"
