@@ -7,6 +7,8 @@
 #include "CHIP-8.hpp"
 #include "helpers.hpp"
 #include "keyboard.hpp"
+#include "machine-specs.hpp"
+#include "data-types.hpp"
 
 using std::exception;
 using std::vector;
@@ -293,7 +295,7 @@ void Executor::category_F(const Instruction::Instruction_payload& payload)
 	case 0x29:
 	{
 		const auto num = machine.registers[payload.X];
-		machine.index_register = FONT_DATA_START_LOCATION + FONT_CHAR_SIZE * num;
+		machine.index_register = CHIP_8::Helper::get_sprite_start_location(num);
 		break;
 	}
 	case 0x33:

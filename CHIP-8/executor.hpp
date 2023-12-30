@@ -1,10 +1,8 @@
 #pragma once
 
-#include <vector>
 #include <array>
 
 #include "CHIP-8.hpp"
-#include "keyboard.hpp"
 #include "data-types.hpp"
 
 class Executor

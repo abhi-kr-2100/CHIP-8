@@ -142,3 +142,8 @@ Instruction CHIP_8::Helper::make_instruction_from_bytes(instruction_t bytes)
 		{ X, Y, N, NN, NNN },
 	};
 }
+
+double_byte CHIP_8::Helper::get_sprite_start_location(byte sprite_number)
+{
+	return FONT_DATA_START_LOCATION + FONT_CHAR_SIZE * sprite_number;
+}
