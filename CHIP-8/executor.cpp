@@ -3,18 +3,15 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <SFML/Window/Keyboard.hpp>
-
 #include "executor.hpp"
 #include "CHIP-8.hpp"
 #include "helpers.hpp"
+#include "keyboard.hpp"
 
 using std::exception;
 using std::vector;
 using std::pow;
 using std::rand;
-
-using sf::Keyboard;
 
 Executor::Executor(CHIP_8& machine)
 	: machine{ machine }, executors{
@@ -242,7 +239,7 @@ void Executor::skip_cond_key(const CHIP_8::Instruction::Instruction_payload& pay
 	{
 	case 0x9E:
 	{
-		const auto pressed_keys = Helper::get_pressed_keys();
+		const auto pressed_keys = Helper::get_pressed_keys(machine);
 		for (const auto& key : pressed_keys)
 		{
 			if (machine.registers[payload.X] == (int)key)
@@ -255,7 +252,7 @@ void Executor::skip_cond_key(const CHIP_8::Instruction::Instruction_payload& pay
 	}
 	case 0xA1:
 	{
-		const auto pressed_keys = Helper::get_pressed_keys();
+		const auto pressed_keys = Helper::get_pressed_keys(machine);
 		bool key_pressed = false;
 		for (const auto& key : pressed_keys)
 		{
@@ -287,11 +284,11 @@ void Executor::category_F(const CHIP_8::Instruction::Instruction_payload& payloa
 	case 0x0A:
 	{
 		machine.is_blocked = true;
-		for (const auto& [key, code] : CHIP_8_TO_KBD)
+		for (Key k = Key::K0; k <= Key::KF; k = static_cast<Key>((int)k + 1))
 		{
-			if (Keyboard::isKeyPressed(code))
+			if (machine.keyboard.is_key_pressed(k))
 			{
-				machine.registers[payload.X] = (int)key;
+				machine.registers[payload.X] = (int)k;
 				machine.is_blocked = false;
 				break;
 			}
@@ -363,14 +360,14 @@ void Executor::Helper::return_(CHIP_8& machine)
 /**
  * Return the pressed key, Key::None if no key is pressed.
  */
-vector<Key> Executor::Helper::get_pressed_keys()
+vector<Key> Executor::Helper::get_pressed_keys(const CHIP_8& machine)
 {
 	vector<Key> pressed_keys;
-	for (const auto& [key, code] : CHIP_8_TO_KBD)
+	for (Key k = Key::K0; k <= Key::KF; k = static_cast<Key>((int)k + 1))
 	{
-		if (Keyboard::isKeyPressed(code))
+		if (machine.keyboard.is_key_pressed(k))
 		{
-			pressed_keys.push_back(key);
+			pressed_keys.push_back(k);
 		}
 	}
 

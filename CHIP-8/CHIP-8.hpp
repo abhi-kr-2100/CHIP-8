@@ -5,6 +5,7 @@
 #include "data-types.hpp"
 #include "font-data.hpp"
 #include "machine-specs.hpp"
+#include "keyboard.hpp"
 
 class Executor;
 
@@ -16,6 +17,8 @@ public:
 
 	const Frame_buffer& get_frame_buffer() const;
 	void decrement_timers(byte times);
+
+	Keyboard keyboard;
 
 	CHIP_8();
 	~CHIP_8();

@@ -3,13 +3,16 @@
 #include <array>
 #include <vector>
 #include <chrono>
+#include <unordered_map>
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Window/Keyboard.hpp>
 
 #include "CHIP-8.hpp"
 #include "helpers.hpp"
 #include "data-types.hpp"
 #include "machine-specs.hpp"
+#include "keyboard-data.hpp"
 
 using std::chrono::system_clock;
 using std::chrono::duration_cast;
@@ -21,6 +24,7 @@ using std::array;
 using std::ios;
 using std::vector;
 using std::istream;
+using std::unordered_map;
 
 using sf::RenderWindow;
 using sf::VideoMode;
@@ -28,10 +32,31 @@ using sf::Style::Titlebar;
 using sf::Style::Close;
 using sf::Event;
 using sf::Event::Closed;
+using sf::Event::KeyPressed;
+using sf::Event::KeyReleased;
 using sf::Color;
 using sf::Texture;
 using sf::Uint8;
 using sf::Sprite;
+
+const unordered_map<sf::Keyboard::Scancode, Key> KBD_TO_CHIP_8 = {
+	{ sf::Keyboard::Scan::X, Key::K0 },
+	{ sf::Keyboard::Scan::Num1, Key::K1 },
+	{ sf::Keyboard::Scan::Num2, Key::K2 },
+	{ sf::Keyboard::Scan::Num3, Key::K3 },
+	{ sf::Keyboard::Scan::Q, Key::K4 },
+	{ sf::Keyboard::Scan::W, Key::K5 },
+	{ sf::Keyboard::Scan::E, Key::K6 },
+	{ sf::Keyboard::Scan::A, Key::K7 },
+	{ sf::Keyboard::Scan::S, Key::K8 },
+	{ sf::Keyboard::Scan::D, Key::K9 },
+	{ sf::Keyboard::Scan::Z, Key::KA },
+	{ sf::Keyboard::Scan::C, Key::KB },
+	{ sf::Keyboard::Scan::Num4, Key::KC },
+	{ sf::Keyboard::Scan::R, Key::KD },
+	{ sf::Keyboard::Scan::F, Key::KE },
+	{ sf::Keyboard::Scan::V, Key::KF },
+};
 
 template <size_t SCALING_FACTOR>
 static Texture load_texture_from_frame_buffer(const Frame_buffer& fb);
@@ -69,9 +94,23 @@ int main(int argc, char* argv[])
 	{
 		for (Event e; window.pollEvent(e); )
 		{
-			if (e.type == Closed)
+			switch (e.type)
 			{
+			case Closed:
 				window.close();
+				break;
+			case KeyPressed:
+				if (KBD_TO_CHIP_8.find(e.key.scancode) != KBD_TO_CHIP_8.end())
+				{
+					machine.keyboard.set_key_pressed(KBD_TO_CHIP_8.at(e.key.scancode));
+				}
+				break;
+			case KeyReleased:
+				if (KBD_TO_CHIP_8.find(e.key.scancode) != KBD_TO_CHIP_8.end())
+				{
+					machine.keyboard.set_key_released(KBD_TO_CHIP_8.at(e.key.scancode));
+				}
+				break;
 			}
 		}
 
