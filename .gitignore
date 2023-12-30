@@ -364,3 +364,4 @@ FodyWeavers.xsd
 /vcpkg_installed/x64-windows
 /vcpkg_installed/vcpkg
 /Frontend-C++-SFML/vcpkg_installed/x64-windows
+/Python-Frontend/vcpkg_installed
