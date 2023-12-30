@@ -3,7 +3,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <PythonCHIP8LibName>PyCHIP8</PythonCHIP8LibName>
-    <PyCharmProject>$(ProjectDir)CHIP8\</PyCharmProject>
+    <PyCharmProject>$(ProjectDir)CHIP8\PyCHIP8\</PyCharmProject>
   </PropertyGroup>
   <PropertyGroup>
     <_PropertySheetDisplayName>Python Dependencies</_PropertySheetDisplayName>
