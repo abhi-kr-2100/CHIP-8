@@ -49,5 +49,6 @@ private:
 	{
 	public:
 		static void insert_instruction(CHIP_8& machine, instruction_t ins, double_byte location);
+		static Instruction make_instruction_from_bytes(instruction_t bytes);
 	};
 };

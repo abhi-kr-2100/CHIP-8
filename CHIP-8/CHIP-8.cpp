@@ -98,21 +98,7 @@ Instruction CHIP_8::get_current_instruction() const
 	}
 
 	const instruction_t ins = concatenate_bytes(memory.at(pc), memory.at(pc + 1));
-
-	const byte category = get_nibbles_in_range(ins, 0, 0);
-
-	const byte X = get_nibbles_in_range(ins, 1, 1);
-	const byte Y = get_nibbles_in_range(ins, 2, 2);
-	const byte N = get_nibbles_in_range(ins, 3, 3);
-	const byte NN = get_nibbles_in_range(ins, 2, 3);
-	const double_byte NNN = get_nibbles_in_range(ins, 1, 3);
-
-	return Instruction
-	{
-		ins,
-		category,
-		{ X, Y, N, NN, NNN },
-	};
+	return Helper::make_instruction_from_bytes(ins);
 }
 
 const Frame_buffer& CHIP_8::get_frame_buffer() const
@@ -137,4 +123,22 @@ void CHIP_8::Helper::insert_instruction(CHIP_8& machine, instruction_t ins, doub
 			start_nibble + NIBBLES_PER_BYTE - 1
 		);
 	}
+}
+
+Instruction CHIP_8::Helper::make_instruction_from_bytes(instruction_t bytes)
+{
+	const byte category = get_nibbles_in_range(bytes, 0, 0);
+
+	const byte X = get_nibbles_in_range(bytes, 1, 1);
+	const byte Y = get_nibbles_in_range(bytes, 2, 2);
+	const byte N = get_nibbles_in_range(bytes, 3, 3);
+	const byte NN = get_nibbles_in_range(bytes, 2, 3);
+	const double_byte NNN = get_nibbles_in_range(bytes, 1, 3);
+
+	return Instruction
+	{
+		bytes,
+		category,
+		{ X, Y, N, NN, NNN },
+	};
 }
