@@ -12,7 +12,7 @@ using std::exception;
 using std::rand;
 
 CHIP_8::CHIP_8()
-	: pc{PROGRAM_DATA_START_LOCATION}, executor{new Executor(*this)}
+	: pc{ PROGRAM_DATA_START_LOCATION }, executor{ new Executor(*this) }
 {
 	memory.fill(0);
 	registers.fill(0);
@@ -30,7 +30,7 @@ CHIP_8::~CHIP_8()
 void CHIP_8::load_program(const ROM& program)
 {
 	for (size_t ins_ctr = 0, mem_ctr = 0; ins_ctr < MAX_NUM_INSTRUCTIONS;
-			++ins_ctr, mem_ctr += INSTRUCTION_SIZE)
+		 ++ins_ctr, mem_ctr += INSTRUCTION_SIZE)
 	{
 		for (size_t byte_ctr = 0; byte_ctr < INSTRUCTION_SIZE; ++byte_ctr)
 		{
@@ -118,18 +118,13 @@ CHIP_8::Instruction CHIP_8::get_current_instruction() const
 		category,
 		{
 			X, Y, N, NN, NNN
-		},
+	},
 	};
 }
 
-byte CHIP_8::get_pixel_at(size_t x, size_t y) const
+const Frame_buffer& CHIP_8::get_frame_buffer() const
 {
-	if (x >= frame_buffer.size() || y >= frame_buffer[0].size())
-	{
-		throw exception("get_pixel_at: coordinate out of screen.");
-	}
-
-	return frame_buffer.at(x).at(y);
+	return frame_buffer;
 }
 
 void CHIP_8::decrement_timers(byte times)

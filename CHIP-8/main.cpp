@@ -31,8 +31,6 @@ using sf::Texture;
 using sf::Uint8;
 using sf::Sprite;
 
-static Frame_buffer extract_frame_buffer(const CHIP_8& machine);
-
 template <size_t SCALING_FACTOR>
 static Texture load_texture_from_frame_buffer(const Frame_buffer& fb);
 
@@ -53,13 +51,13 @@ int main(int argc, char* argv[])
 
 	ifstream rom{ argv[1], ios::binary };
 	const auto program = load_program_from_stream(rom);
-	
+
 	CHIP_8 machine;
 	machine.load_program(program);
 
 	constexpr auto SCALING_FACTOR = 10;
 	auto window = RenderWindow{
-		VideoMode{FRAME_BUFFER_WIDTH * SCALING_FACTOR, FRAME_BUFFER_HEIGHT * SCALING_FACTOR},
+		VideoMode{ FRAME_BUFFER_WIDTH * SCALING_FACTOR, FRAME_BUFFER_HEIGHT * SCALING_FACTOR },
 		"CHIP-8",
 		Titlebar | Close
 	};
@@ -97,7 +95,7 @@ int main(int argc, char* argv[])
 		const size_t timer_decrements_elapsed = refreshes_elapsed * TIMER_DECREMENTS_PER_REFRESH;
 		machine.decrement_timers(timer_decrements_elapsed);
 
-		const auto frame_buffer = extract_frame_buffer(machine);
+		const auto frame_buffer = machine.get_frame_buffer();
 		redraw_if_necessary<SCALING_FACTOR>(window, frame_buffer);
 	}
 }
@@ -137,20 +135,6 @@ void redraw_if_necessary(RenderWindow& window, const Frame_buffer& fb)
 	window.clear();
 	window.draw(screen_sprite);
 	window.display();
-}
-
-static Frame_buffer extract_frame_buffer(const CHIP_8& machine)
-{
-	Frame_buffer fb{};
-	for (size_t x = 0; x < FRAME_BUFFER_WIDTH; ++x)
-	{
-		for (size_t y = 0; y < FRAME_BUFFER_HEIGHT; ++y)
-		{
-			fb[x][y] = machine.get_pixel_at(x, y);
-		}
-	}
-
-	return fb;
 }
 
 template <size_t SCALING_FACTOR>

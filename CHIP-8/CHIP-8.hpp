@@ -17,7 +17,7 @@ public:
 	void load_program(const ROM& program);
 	bool run_one();
 
-	byte get_pixel_at(size_t x, size_t y) const;
+	const Frame_buffer& get_frame_buffer() const;
 	void decrement_timers(byte times);
 
 	CHIP_8();
