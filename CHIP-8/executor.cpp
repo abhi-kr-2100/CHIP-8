@@ -1,4 +1,4 @@
-#include <exception>
+#include <stdexcept>
 #include <vector>
 #include <cstdlib>
 #include <cmath>
@@ -10,7 +10,10 @@
 #include "machine-specs.hpp"
 #include "data-types.hpp"
 
-using std::exception;
+using std::underflow_error;
+using std::overflow_error;
+using std::out_of_range;
+using std::invalid_argument;
 using std::vector;
 using std::pow;
 using std::rand;
@@ -45,7 +48,7 @@ void Executor::category_0(const Instruction::Instruction_payload& payload)
 	}
 	else
 	{
-		throw exception("Machine call (0NNN) is not supported.");
+		throw invalid_argument("category_0: machine call is not supported");
 	}
 }
 
@@ -53,7 +56,7 @@ void Executor::jump(const Instruction::Instruction_payload& payload)
 {
 	if (payload.NNN >= machine.memory.size())
 	{
-		throw exception("Jump address out of range.");
+		throw out_of_range("jump: destination is outside memory");
 	}
 
 	machine.pc = payload.NNN;
@@ -63,12 +66,12 @@ void Executor::subroutine_call(const Instruction::Instruction_payload& payload)
 {
 	if (payload.NNN >= machine.memory.size())
 	{
-		throw exception("Subroutine address out of range.");
+		throw out_of_range("subroutine_call: subroutine lies outside memory");
 	}
 
 	if (machine.stack_pointer >= machine.stack.size())
 	{
-		throw exception("Subroutine call limit reached.");
+		throw overflow_error("subroutine_call: stack overflowed");
 	}
 
 	machine.stack[machine.stack_pointer++] = machine.pc;
@@ -95,7 +98,7 @@ void Executor::skip_if_vx_eq_vy(const Instruction::Instruction_payload& payload)
 {
 	if (payload.N != 0)
 	{
-		throw exception("Unknown instruction. Category 0x5 instructions are of the form 0x5XY0.");
+		throw invalid_argument("skip_if_vx_eq_vy: invalid instruction");
 	}
 
 	if (machine.registers[payload.X] == machine.registers[payload.Y])
@@ -171,7 +174,7 @@ void Executor::operate_and_assign(const Instruction::Instruction_payload& payloa
 		break;
 	}
 	default:
-		throw exception("Invalid category 8 instruction format.");
+		throw invalid_argument("operate_and_assign: invalid instruction");
 	}
 }
 
@@ -179,7 +182,7 @@ void Executor::skip_if_vx_neq_vy(const Instruction::Instruction_payload& payload
 {
 	if (payload.N != 0)
 	{
-		throw exception("Invalid category 9 instruction format.");
+		throw invalid_argument("skip_if_vx_neq_vy: invalid instruction");
 	}
 
 	if (machine.registers[payload.X] != machine.registers[payload.Y])
@@ -258,7 +261,7 @@ void Executor::skip_cond_key(const Instruction::Instruction_payload& payload)
 		break;
 	}
 	default:
-		throw exception("skip_cond_key: badly formatted category E instruction.");
+		throw invalid_argument("skip_cond_key: invalid instruction");
 	}
 }
 
@@ -324,7 +327,7 @@ void Executor::category_F(const Instruction::Instruction_payload& payload)
 		break;
 	}
 	default:
-		throw exception("Invalid category F instruction format.");
+		throw invalid_argument("category_F: invalid instruction");
 		break;
 	}
 }
@@ -338,7 +341,7 @@ void Executor::Helper::return_(CHIP_8& machine)
 {
 	if (machine.stack_pointer == 0)
 	{
-		throw exception("return_: no address to return to.");
+		throw underflow_error("return_: no return address on stack");
 	}
 
 	const double_byte return_addr = machine.stack[--machine.stack_pointer];

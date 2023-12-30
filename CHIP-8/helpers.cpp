@@ -1,5 +1,5 @@
 #include <vector>
-#include <exception>
+#include <stdexcept>
 #include <algorithm>
 
 #include "helpers.hpp"
@@ -8,7 +8,7 @@
 
 using std::vector;
 using std::reverse;
-using std::exception;
+using std::out_of_range;
 
 double_byte concatenate_bytes(byte b1, byte b2)
 {
@@ -31,7 +31,7 @@ double_byte get_nibbles_in_range(double_byte b, int first, int last)
 
 	if (last >= NIBBLES_PER_DOUBLE_BYTE)
 	{
-		throw exception("get_nibbles_in_range: requested interval is out of range for a double byte");
+		throw out_of_range("get_nibbles_in_range: requested nibble is outside byte");
 	}
 
 	// shift so that all useless nibbles on the right are discarded
@@ -42,7 +42,7 @@ double_byte get_nibbles_in_range(double_byte b, int first, int last)
 
 	if (num_nibbles_to_extract <= 0 || num_nibbles_to_extract > NIBBLES_PER_DOUBLE_BYTE)
 	{
-		throw exception("get_nibbles_in_range: number of requested nibbles is too small or too large.");
+		throw out_of_range("get_nibbles_in_range: requested nibble is outside byte");
 	}
 
 	// To set bits not in range to 0, we need a mask.

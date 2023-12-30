@@ -1,5 +1,5 @@
 #include <cstdlib>
-#include <exception>
+#include <stdexcept>
 
 #include "CHIP-8.hpp"
 #include "helpers.hpp"
@@ -8,8 +8,8 @@
 #include "font-data.hpp"
 #include "data-types.hpp"
 
-using std::exception;
 using std::rand;
+using std::out_of_range;
 
 CHIP_8::CHIP_8()
 	: pc{ PROGRAM_DATA_START_LOCATION }, executor{ new Executor(*this) }
@@ -91,9 +91,7 @@ Instruction CHIP_8::get_current_instruction() const
 	// A CHIP-8 insturction is 2 bytes long; hence `pc + 1`.
 	if (pc + 1 >= memory.size())
 	{
-		throw exception(
-			"get_current_instruction: program counter points outside memory."
-		);
+		throw out_of_range("get_current_instruction: pc points outside memory");
 	}
 
 	const instruction_t ins = concatenate_bytes(memory.at(pc), memory.at(pc + 1));
