@@ -239,31 +239,17 @@ void Executor::skip_cond_key(const Instruction::Instruction_payload& payload)
 	{
 	case 0x9E:
 	{
-		const auto pressed_keys = Helper::get_pressed_keys(machine);
-		for (const auto& key : pressed_keys)
+		const auto key = static_cast<Key>(machine.registers[payload.X]);
+		if (machine.keyboard.is_key_pressed(key))
 		{
-			if (machine.registers[payload.X] == (int)key)
-			{
-				machine.pc += INSTRUCTION_SIZE;
-				break;
-			}
+			machine.pc += INSTRUCTION_SIZE;
 		}
 		break;
 	}
 	case 0xA1:
 	{
-		const auto pressed_keys = Helper::get_pressed_keys(machine);
-		bool key_pressed = false;
-		for (const auto& key : pressed_keys)
-		{
-			if (machine.registers[payload.X] == (int)key)
-			{
-				key_pressed = true;
-				break;
-			}
-		}
-
-		if (!key_pressed)
+		const auto key = static_cast<Key>(machine.registers[payload.X]);
+		if (!machine.keyboard.is_key_pressed(key))
 		{
 			machine.pc += INSTRUCTION_SIZE;
 		}
@@ -355,21 +341,4 @@ void Executor::Helper::return_(CHIP_8& machine)
 
 	const double_byte return_addr = machine.stack[--machine.stack_pointer];
 	machine.pc = return_addr;
-}
-
-/**
- * Return the pressed key, Key::None if no key is pressed.
- */
-vector<Key> Executor::Helper::get_pressed_keys(const CHIP_8& machine)
-{
-	vector<Key> pressed_keys;
-	for (Key k = Key::K0; k <= Key::KF; k = static_cast<Key>((int)k + 1))
-	{
-		if (machine.keyboard.is_key_pressed(k))
-		{
-			pressed_keys.push_back(k);
-		}
-	}
-
-	return pressed_keys;
 }

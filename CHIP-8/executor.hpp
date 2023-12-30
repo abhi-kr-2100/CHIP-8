@@ -38,7 +38,5 @@ private:
 	public:
 		static void clear_screen(CHIP_8& machine);
 		static void return_(CHIP_8& machine);
-
-		static std::vector<Key> get_pressed_keys(const CHIP_8& machine);
 	};
 };
