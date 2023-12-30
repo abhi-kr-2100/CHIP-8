@@ -44,4 +44,10 @@ private:
 	Executor* executor;
 
 	friend class Executor;
+
+	class Helper
+	{
+	public:
+		static void insert_instruction(CHIP_8& machine, instruction_t ins, double_byte location);
+	};
 };

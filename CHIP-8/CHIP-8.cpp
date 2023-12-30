@@ -30,20 +30,14 @@ CHIP_8::~CHIP_8()
 
 void CHIP_8::load_program(const ROM& program)
 {
-	for (size_t ins_ctr = 0, mem_ctr = 0; ins_ctr < MAX_NUM_INSTRUCTIONS;
-		 ++ins_ctr, mem_ctr += INSTRUCTION_SIZE)
+	for (size_t i = 0, psz = program.size(); i < psz; ++i)
 	{
-		for (size_t byte_ctr = 0; byte_ctr < INSTRUCTION_SIZE; ++byte_ctr)
-		{
-			const auto start_nibble = byte_ctr * NIBBLES_PER_BYTE;
-			const auto mem_location = mem_ctr + byte_ctr + \
-				PROGRAM_DATA_START_LOCATION;
-			memory[mem_location] = get_nibbles_in_range(
-				program[ins_ctr],
-				start_nibble,
-				start_nibble + NIBBLES_PER_BYTE - 1
-			);
-		}
+		const auto ins = program[i];
+
+		const auto mem_i = i * INSTRUCTION_SIZE;
+		const auto mem_location = mem_i + PROGRAM_DATA_START_LOCATION;
+
+		Helper::insert_instruction(*this, ins, mem_location);
 	}
 }
 
@@ -130,4 +124,17 @@ void CHIP_8::decrement_timers(byte times)
 {
 	delay_timer = times >= delay_timer ? 0 : (delay_timer - times);
 	sound_timer = times >= sound_timer ? 0 : (sound_timer - times);
+}
+
+void CHIP_8::Helper::insert_instruction(CHIP_8& machine, instruction_t ins, double_byte location)
+{
+	for (size_t byte_i = 0; byte_i < INSTRUCTION_SIZE; ++byte_i)
+	{
+		const auto start_nibble = byte_i * NIBBLES_PER_BYTE;
+		machine.memory[location + byte_i] = get_nibbles_in_range(
+			ins,
+			start_nibble,
+			start_nibble + NIBBLES_PER_BYTE - 1
+		);
+	}
 }
