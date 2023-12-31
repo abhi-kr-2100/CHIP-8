@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <stdexcept>
+#include <array>
 
 #include "CHIP-8.hpp"
 #include "helpers.hpp"
@@ -8,6 +9,7 @@
 #include "font-data.hpp"
 #include "data-types.hpp"
 
+using std::array;
 using std::rand;
 using std::out_of_range;
 
@@ -38,6 +40,23 @@ void CHIP_8::load_program(const ROM& program)
 
 		Helper::insert_instruction(*this, ins, mem_location);
 	}
+}
+
+void CHIP_8::load_program_from_bytes(const array<byte, MAX_NUM_INSTRUCTIONS* INSTRUCTION_SIZE>& bytes)
+{
+	constexpr auto sz = MAX_NUM_INSTRUCTIONS * INSTRUCTION_SIZE;
+
+	ROM program{};
+	for (size_t ins_i = 0, j = 0; ins_i < sz; ins_i += INSTRUCTION_SIZE, ++j)
+	{
+		byte first = bytes[ins_i];
+		byte second = (ins_i + 1 < sz) ? bytes[ins_i + 1] : 0x0;
+
+		instruction_t ins = concatenate_bytes(first, second);
+		program[j] = ins;
+	}
+
+	load_program(program);
 }
 
 /**
