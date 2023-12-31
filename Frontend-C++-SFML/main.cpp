@@ -66,7 +66,7 @@ bool redraw_necessary(const Frame_buffer& fb);
 template <size_t SCALING_FACTOR>
 void redraw_if_necessary(RenderWindow& window, const Frame_buffer& fb);
 
-ROM load_program_from_stream(istream& stream);
+void load_program_from_stream(istream& stream, CHIP_8& machine);
 
 int main(int argc, char* argv[])
 {
@@ -77,10 +77,8 @@ int main(int argc, char* argv[])
 	}
 
 	ifstream rom{ argv[1], ios::binary };
-	const auto program = load_program_from_stream(rom);
-
 	CHIP_8 machine;
-	machine.load_program(program);
+	load_program_from_stream(rom, machine);
 
 	constexpr auto SCALING_FACTOR = 10;
 	auto window = RenderWindow{
@@ -216,22 +214,20 @@ static Texture load_texture_from_frame_buffer(const Frame_buffer& fb)
 	return texture;
 }
 
-ROM load_program_from_stream(istream& stream)
+void load_program_from_stream(istream& stream, CHIP_8& machine)
 {
-	vector<unsigned char> bytes;
-	for (int byte = 0; (byte = stream.get()), !stream.eof(); bytes.push_back(byte))
+	constexpr auto max_num_bytes = MAX_NUM_INSTRUCTIONS * INSTRUCTION_SIZE;
+	array<byte, max_num_bytes> bytes{};
+	bytes.fill(0);
+	for (auto& b : bytes)
 	{
+		if (!stream)
+		{
+			break;
+		}
+
+		b = stream.get();
 	}
 
-	ROM program{};
-	for (size_t i = 0, j = 0, sz = bytes.size(); i < sz; i += INSTRUCTION_SIZE, ++j)
-	{
-		byte first = bytes[i];
-		byte second = (i + 1 < sz) ? bytes[i + 1] : 0x0;
-
-		instruction_t ins = concatenate_bytes(first, second);
-		program[j] = ins;
-	}
-
-	return program;
+	machine.load_program_from_bytes(bytes);
 }

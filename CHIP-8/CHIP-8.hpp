@@ -13,6 +13,7 @@ class CHIP_8
 {
 public:
 	void load_program(const ROM& program);
+	void load_program_from_bytes(const std::array<byte, MAX_NUM_INSTRUCTIONS* INSTRUCTION_SIZE>& bytes);
 	bool run_one();
 
 	const Frame_buffer& get_frame_buffer() const;
