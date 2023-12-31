@@ -3,6 +3,7 @@
 
 #include "CHIP-8.hpp"
 #include "keyboard.hpp"
+#include <machine-specs.hpp>
 
 namespace py = pybind11;
 
@@ -43,4 +44,8 @@ PYBIND11_MODULE(PyCHIP8, m)
 		.value("KF", Key::KF)
 		.value("NONE", Key::NONE)
 		.export_values();
+
+	m.attr("MILLISECONDS_PER_REFRESH") = MILLISECONDS_PER_REFRESH;
+	m.attr("INSTRUCTIONS_PER_REFRESH") = INSTRUCTIONS_PER_REFRESH;
+	m.attr("TIMER_DECREMENTS_PER_REFRESH") = TIMER_DECREMENTS_PER_REFRESH;
 }
