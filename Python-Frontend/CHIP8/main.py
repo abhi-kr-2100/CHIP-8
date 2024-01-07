@@ -77,7 +77,7 @@ class CHIP8GameScreen(QGraphicsView):
         self.game_scene = CHIP8GameScreenScene()
         self.setScene(self.game_scene)
 
-        self.setFixedSize(width * (scaling_factor + 1), height * (scaling_factor + 1))
+        self.setMinimumSize(width * (scaling_factor + 1), height * (scaling_factor + 1))
         self.scale(scaling_factor, scaling_factor)
 
     def refresh(self, frame_buffer):
