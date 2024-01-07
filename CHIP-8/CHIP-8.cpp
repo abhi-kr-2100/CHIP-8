@@ -8,20 +8,16 @@
 #include "machine-specs.hpp"
 #include "font-data.hpp"
 #include "data-types.hpp"
+#include "keyboard.hpp"
 
 using std::array;
 using std::rand;
 using std::out_of_range;
 
 CHIP_8::CHIP_8()
-	: pc{ PROGRAM_DATA_START_LOCATION }, executor{ new Executor(*this) }
+	: executor{ new Executor(*this) }
 {
-	memory.fill(0);
-	registers.fill(0);
-	stack.fill(0);
-	frame_buffer.fill({});
-
-	load_fonts(FONT_DATA_START_LOCATION, FONT_DATA);
+	reset();
 }
 
 CHIP_8::~CHIP_8()
@@ -31,6 +27,8 @@ CHIP_8::~CHIP_8()
 
 void CHIP_8::load_program(const ROM& program)
 {
+	reset();
+
 	for (size_t i = 0, psz = program.size(); i < psz; ++i)
 	{
 		const auto ins = program[i];
@@ -74,7 +72,6 @@ bool CHIP_8::run_one()
 	}
 
 	const auto ins = get_current_instruction();
-	pc += INSTRUCTION_SIZE;
 
 	// 0x0000 is not a valid CHIP-8 instruction. However, empty memory cells
 	// are 0. When a program has run to completion, PC points to empty memory
@@ -83,6 +80,8 @@ bool CHIP_8::run_one()
 	{
 		return false;
 	}
+
+	pc += INSTRUCTION_SIZE;
 
 	executor->execute(ins);
 	return true;
@@ -115,6 +114,22 @@ Instruction CHIP_8::get_current_instruction() const
 
 	const instruction_t ins = concatenate_bytes(memory.at(pc), memory.at(pc + 1));
 	return Helper::make_instruction_from_bytes(ins);
+}
+
+void CHIP_8::reset()
+{
+	pc = PROGRAM_DATA_START_LOCATION;
+	memory.fill(0);
+	registers.fill(0);
+	stack.fill(0);
+	frame_buffer.fill({});
+
+	for (auto key = Key::K0; key <= Key::KF; key = static_cast<Key>(static_cast<int>(key) + 1))
+	{
+		keyboard.set_key_released(key);
+	}
+
+	load_fonts(FONT_DATA_START_LOCATION, FONT_DATA);
 }
 
 const Frame_buffer& CHIP_8::get_frame_buffer() const

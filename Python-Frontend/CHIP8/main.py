@@ -13,14 +13,13 @@ from PyCHIP8.PyCHIP8 import CHIP_8, MILLISECONDS_PER_REFRESH, INSTRUCTIONS_PER_R
 
 
 def main():
-    if len(argv) != 2:
-        print(f"Usage: {argv[0]} file", file=stderr)
+    if len(argv) > 2:
+        print(f"Usage: {argv[0]} [file]", file=stderr)
         exit(1)
 
     machine = CHIP_8()
-    _, filename = argv
-    ins_bytes = get_bytes(filename)
-    machine.load_program_from_bytes(ins_bytes)
+    if len(argv) == 2:
+        machine.load_program_from_bytes(get_bytes(argv[1]))
 
     app = CHIP8App(machine)
     return app.exec()
@@ -71,8 +70,9 @@ class CHIP8MainWindow(QMainWindow):
         self.setWindowTitle("CHIP-8")
 
     def load_rom(self):
-        rom_name = QFileDialog.getOpenFileName(self, "Open ROM", "")
-        print(rom_name)
+        rom_name, _ = QFileDialog.getOpenFileName(self, "Open ROM", "")
+        if rom_name:
+            self.machine.load_program_from_bytes(get_bytes(rom_name))
 
     def keyPressEvent(self, event):
         if (key := event.key()) in KBD_TO_CHIP_8:
