@@ -4,13 +4,11 @@ from sys import argv, exit, stderr
 
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QImage, QPixmap
-from PySide6.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsItem, QGraphicsPixmapItem
+from PySide6.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QMainWindow
 
 from PyCHIP8.host.consts import KBD_TO_CHIP_8, SCALING_FACTOR
 from PyCHIP8.host.helpers import get_bytes
-from PyCHIP8.PyCHIP8 import (
-    CHIP_8, MILLISECONDS_PER_REFRESH, INSTRUCTIONS_PER_REFRESH, TIMER_DECREMENTS_PER_REFRESH
-)
+from PyCHIP8.PyCHIP8 import CHIP_8, MILLISECONDS_PER_REFRESH, INSTRUCTIONS_PER_REFRESH, TIMER_DECREMENTS_PER_REFRESH
 
 
 def main():
@@ -32,16 +30,18 @@ class CHIP8App(QApplication):
         super().__init__([])
         self.machine = machine
 
-        self.scene = CHIP8FrameBuffer()
-        self.screen = CHIP8Screen(self.scene, self.machine)
+        self.scene = CHIP8GameScreenScene()
+        self.screen = CHIP8GameScreen(self.scene, self.machine)
         self.screen.scale(SCALING_FACTOR, SCALING_FACTOR)
+
+        self.main_window = CHIP8MainWindow(self.screen)
 
         self.refresh_timer = QTimer()
         self.refresh_timer.setInterval(MILLISECONDS_PER_REFRESH)
         self.refresh_timer.timeout.connect(self.refresh)
         self.refresh_timer.start()
 
-        self.screen.show()
+        self.main_window.show()
 
     def refresh(self):
         for _ in range(INSTRUCTIONS_PER_REFRESH):
@@ -51,7 +51,17 @@ class CHIP8App(QApplication):
         self.screen.update()
 
 
-class CHIP8Screen(QGraphicsView):
+class CHIP8MainWindow(QMainWindow):
+    def __init__(self, game_screen):
+        super().__init__()
+
+        self.game_screen = game_screen
+        self.setCentralWidget(game_screen)
+
+        self.setWindowTitle("CHIP-8")
+
+
+class CHIP8GameScreen(QGraphicsView):
     def __init__(self, scene, machine):
         super().__init__(scene)
         self.machine = machine
@@ -69,7 +79,7 @@ class CHIP8Screen(QGraphicsView):
             self.machine.keyboard.set_key_released(KBD_TO_CHIP_8[key])
 
 
-class CHIP8FrameBuffer(QGraphicsScene):
+class CHIP8GameScreenScene(QGraphicsScene):
     def __init__(self):
         super().__init__()
         self.addText("Empty!")
