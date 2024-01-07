@@ -3,8 +3,9 @@
 from sys import argv, exit, stderr
 
 from PySide6.QtCore import QTimer
-from PySide6.QtGui import QImage, QPixmap
-from PySide6.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QMainWindow
+from PySide6.QtGui import QImage, QPixmap, QAction
+from PySide6.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QMainWindow, QToolBar, \
+    QFileDialog
 
 from PyCHIP8.host.consts import KBD_TO_CHIP_8, SCALING_FACTOR
 from PyCHIP8.host.helpers import get_bytes
@@ -35,7 +36,7 @@ class CHIP8App(QApplication):
         height = len(self.machine.frame_buffer[0])
         self.screen = CHIP8GameScreen(width, height, SCALING_FACTOR)
 
-        self.main_window = CHIP8MainWindow(self.screen, self.machine.keyboard)
+        self.main_window = CHIP8MainWindow(self.screen, self.machine.keyboard, self.machine)
 
         self.refresh_timer = QTimer()
         self.refresh_timer.setInterval(MILLISECONDS_PER_REFRESH)
@@ -52,14 +53,26 @@ class CHIP8App(QApplication):
 
 
 class CHIP8MainWindow(QMainWindow):
-    def __init__(self, game_screen, keyboard):
+    def __init__(self, game_screen, keyboard, machine):
         super().__init__()
 
         self.game_screen = game_screen
         self.keyboard = keyboard
+        self.machine = machine
+
+        self.load_rom_action = QAction("Open file", self)
+        self.load_rom_action.setStatusTip("Open and load a ROM.")
+        self.load_rom_action.triggered.connect(self.load_rom)
+
+        self.toolbar = CHIP8ToolBar([self.load_rom_action])
+        self.addToolBar(self.toolbar)
 
         self.setCentralWidget(game_screen)
         self.setWindowTitle("CHIP-8")
+
+    def load_rom(self):
+        rom_name = QFileDialog.getOpenFileName(self, "Open ROM", "")
+        print(rom_name)
 
     def keyPressEvent(self, event):
         if (key := event.key()) in KBD_TO_CHIP_8:
@@ -68,6 +81,13 @@ class CHIP8MainWindow(QMainWindow):
     def keyReleaseEvent(self, event):
         if (key := event.key()) in KBD_TO_CHIP_8:
             self.keyboard.set_key_released(KBD_TO_CHIP_8[key])
+
+
+class CHIP8ToolBar(QToolBar):
+    def __init__(self, actions):
+        super().__init__("CHIP-8 Toolbar")
+
+        self.addActions(actions)
 
 
 class CHIP8GameScreen(QGraphicsView):
