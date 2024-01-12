@@ -3,10 +3,12 @@ from PySide6.QtGui import QImage, QPixmap, QAction
 from PySide6.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QMainWindow, QToolBar, \
     QFileDialog
 
+from PyCHIP8.PyCHIP8 import MILLISECONDS_PER_REFRESH, INSTRUCTIONS_PER_REFRESH, TIMER_DECREMENTS_PER_REFRESH, Debugger
+
 from PyCHIP8.host.consts import KBD_TO_CHIP_8, SCALING_FACTOR
 from PyCHIP8.host.helpers import get_bytes
 
-from PyCHIP8.PyCHIP8 import MILLISECONDS_PER_REFRESH, INSTRUCTIONS_PER_REFRESH, TIMER_DECREMENTS_PER_REFRESH
+from PyCHIP8.gui.debug import RegistersView
 
 
 class CHIP8App(QApplication):
@@ -14,6 +16,7 @@ class CHIP8App(QApplication):
         super().__init__([])
 
         self.machine = machine
+        self.debugger = Debugger(machine)
 
         width = len(self.machine.frame_buffer)
         height = len(self.machine.frame_buffer[0])
@@ -28,11 +31,16 @@ class CHIP8App(QApplication):
 
         self.main_window.show()
 
+        self.registers_view = RegistersView(self.debugger)
+        self.registers_view.show()
+
     def refresh(self):
         for _ in range(INSTRUCTIONS_PER_REFRESH):
             self.machine.run_one()
         self.machine.decrement_timers(TIMER_DECREMENTS_PER_REFRESH)
         self.screen.refresh(self.machine.frame_buffer)
+
+        self.registers_view.refresh()
 
 
 class CHIP8MainWindow(QMainWindow):
