@@ -13,6 +13,6 @@ public:
 	bool run_one();
 	bool go_back_one();
 private:
-	CHIP_8 machine;
+	CHIP_8& machine;
 	std::stack<Machine_state> states;
 };

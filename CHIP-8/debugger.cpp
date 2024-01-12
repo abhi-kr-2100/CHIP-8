@@ -1,5 +1,6 @@
 #include "CHIP-8.hpp"
 #include "debugger.hpp"
+#include "data-types.hpp"
 
 Debugger::Debugger(CHIP_8& machine)
 	: machine{ machine }
@@ -27,7 +28,7 @@ bool Debugger::run_one()
 
 bool Debugger::go_back_one()
 {
-	const auto most_recent_state = states.top();
+	const auto& most_recent_state = states.top();
 	states.pop();
 
 	machine.load_state(most_recent_state);
