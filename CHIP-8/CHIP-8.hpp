@@ -16,6 +16,8 @@ public:
 	void load_program_from_bytes(const std::array<byte, MAX_NUM_INSTRUCTIONS* INSTRUCTION_SIZE>& bytes);
 	bool run_one();
 
+	void load_state(const Machine_state& state);
+
 	const Frame_buffer& get_frame_buffer() const;
 	void decrement_timers(byte times);
 

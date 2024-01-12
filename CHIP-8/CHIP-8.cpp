@@ -87,6 +87,20 @@ bool CHIP_8::run_one()
 	return true;
 }
 
+void CHIP_8::load_state(const Machine_state& state)
+{
+	memory = state.memory;
+	registers = state.registers;
+	stack = state.stack;
+	frame_buffer = state.frame_buffer;
+	pc = state.pc;
+	index_register = state.index_register;
+	stack_pointer = state.stack_pointer;
+	delay_timer = state.delay_timer;
+	sound_timer = state.sound_timer;
+	is_blocked = state.is_blocked;
+}
+
 void
 CHIP_8::load_fonts(double_byte start_loc, const decltype(FONT_DATA)& fonts)
 {

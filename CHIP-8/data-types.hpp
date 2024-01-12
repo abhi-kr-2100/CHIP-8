@@ -41,3 +41,21 @@ struct Instruction
 	byte category;
 	Instruction_payload payload;
 };
+
+struct Machine_state
+{
+	std::array<byte, MEMORY_SIZE> memory;
+	std::array<byte, NUM_REGISTERS> registers;
+	std::array<double_byte, STACK_SIZE / STACK_ENTRY_SIZE> stack;
+
+	Frame_buffer frame_buffer;
+
+	double_byte pc;
+	double_byte index_register;
+	byte stack_pointer;
+
+	byte delay_timer;
+	byte sound_timer;
+
+	bool is_blocked;
+};
