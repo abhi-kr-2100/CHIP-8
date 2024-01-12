@@ -3,7 +3,8 @@
 
 #include "CHIP-8.hpp"
 #include "keyboard.hpp"
-#include <machine-specs.hpp>
+#include "machine-specs.hpp"
+#include "debugger.hpp"
 
 namespace py = pybind11;
 
@@ -19,6 +20,11 @@ PYBIND11_MODULE(PyCHIP8, m)
 		.def_property_readonly("frame_buffer", &CHIP_8::get_frame_buffer)
 		.def("decrement_timers", &CHIP_8::decrement_timers)
 		.def_readonly("keyboard", &CHIP_8::keyboard);
+
+	py::class_<Debugger>(m, "Debugger")
+		.def(py::init<CHIP_8&>())
+		.def("run_one", &Debugger::run_one)
+		.def("go_back_one", &Debugger::go_back_one);
 
 	py::class_<Keyboard>(m, "Keyboard")
 		.def(py::init())
