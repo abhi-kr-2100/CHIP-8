@@ -36,6 +36,9 @@
     <ClInclude Include="keyboard.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="debugger.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CHIP-8.cpp">
@@ -48,6 +51,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="keyboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debugger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

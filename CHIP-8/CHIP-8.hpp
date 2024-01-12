@@ -8,6 +8,7 @@
 #include "keyboard.hpp"
 
 class Executor;
+class Debugger;
 
 class CHIP_8
 {
@@ -46,8 +47,10 @@ private:
 	void reset();
 
 	Executor* executor;
+	Debugger* debugger;
 
 	friend class Executor;
+	friend class Debugger;
 
 	class Helper
 	{
