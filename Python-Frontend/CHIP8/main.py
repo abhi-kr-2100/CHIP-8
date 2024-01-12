@@ -2,7 +2,7 @@
 
 from sys import argv, exit, stderr
 
-from PyCHIP8.gui import CHIP8App
+from PyCHIP8.gui.main import CHIP8App
 from PyCHIP8.PyCHIP8 import CHIP_8
 
 
