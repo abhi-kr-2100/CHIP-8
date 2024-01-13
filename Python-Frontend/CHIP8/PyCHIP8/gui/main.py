@@ -8,7 +8,7 @@ from PyCHIP8.PyCHIP8 import MILLISECONDS_PER_REFRESH, INSTRUCTIONS_PER_REFRESH, 
 from PyCHIP8.host.consts import KBD_TO_CHIP_8, SCALING_FACTOR, DEBUG_GO_FORWARD_KEY, DEBUG_GO_BACK_KEY
 from PyCHIP8.host.helpers import get_bytes
 
-from PyCHIP8.gui.debug import RegistersView
+from PyCHIP8.gui.debug import RegistersView, MemoryView
 
 
 class CHIP8App(QApplication):
@@ -50,9 +50,10 @@ class CHIP8App(QApplication):
 
         self.main_window.show()
 
-        self.registers_view = RegistersView(self.debugger)
+        self.extra_debug_windows = [RegistersView(self.debugger), MemoryView(self.debugger)]
         if self.debug_mode:
-            self.registers_view.show()
+            for debug_window in self.extra_debug_windows:
+                debug_window.show()
 
     def refresh(self):
         for _ in range(INSTRUCTIONS_PER_REFRESH):
@@ -62,7 +63,8 @@ class CHIP8App(QApplication):
         self.screen.refresh(self.machine.frame_buffer)
 
     def refresh_debug_info(self):
-        self.registers_view.refresh()
+        for debug_window in self.extra_debug_windows:
+            debug_window.refresh()
 
     def load_rom(self):
         rom_name, _ = QFileDialog.getOpenFileName(self.main_window, "Open ROM", "")
@@ -74,14 +76,15 @@ class CHIP8App(QApplication):
             self.debug_mode = False
             self.main_window.set_debug_mode(False)
             self.refresh_timer.start()
-            self.registers_view.hide()
             self.debug_info_refresher_timer.stop()
         else:
             self.debug_mode = True
             self.main_window.set_debug_mode(True)
             self.refresh_timer.stop()
-            self.registers_view.show()
             self.debug_info_refresher_timer.start()
+
+        for debug_window in self.extra_debug_windows:
+            debug_window.setVisible(self.debug_mode)
 
 
 class CHIP8MainWindow(QMainWindow):
