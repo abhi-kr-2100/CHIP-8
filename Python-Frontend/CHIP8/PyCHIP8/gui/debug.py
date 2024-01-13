@@ -12,10 +12,15 @@ class RegistersView(QWidget):
 
         self.layout = QVBoxLayout()
 
+        self.font = QFont("")
+        self.font.setStyleHint(QFont.StyleHint.TypeWriter)
+
         self.index_register_label = QLabel()
+        self.index_register_label.setFont(self.font)
         self.layout.addWidget(self.index_register_label)
 
         self.registers_label = QLabel()
+        self.registers_label.setFont(self.font)
         self.layout.addWidget(self.registers_label)
 
         self.setLayout(self.layout)
@@ -34,10 +39,12 @@ class MemoryView(QWidget):
 
         self.setWindowTitle("Memory View")
 
-        self.highlight_font = QFont()
+        self.highlight_font = QFont("")
+        self.highlight_font.setStyleHint(QFont.StyleHint.TypeWriter)
         self.highlight_font.setBold(True)
 
-        self.normal_font = QFont()
+        self.normal_font = QFont("")
+        self.highlight_font.setStyleHint(QFont.StyleHint.TypeWriter)
 
         self.container = QWidget()
         self.container.setMinimumSize(50, 50)
