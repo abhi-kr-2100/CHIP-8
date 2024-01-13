@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QScrollArea, QLayout
+from PySide6.QtGui import QFont
 
 
 class RegistersView(QWidget):
@@ -33,6 +34,11 @@ class MemoryView(QWidget):
 
         self.setWindowTitle("Memory View")
 
+        self.highlight_font = QFont()
+        self.highlight_font.setBold(True)
+
+        self.normal_font = QFont()
+
         self.container = QWidget()
         self.container.setMinimumSize(50, 50)
         self.container_layout = QVBoxLayout(self.container)
@@ -49,5 +55,9 @@ class MemoryView(QWidget):
         self.layout.addWidget(self.scroll_area)
 
     def refresh(self):
-        for label, memory in zip(self.memory_labels, self.debugger.memory):
+        for i, (label, memory) in enumerate(zip(self.memory_labels, self.debugger.memory)):
             label.setText(f"{memory:#04x}")
+            if i == self.debugger.pc:
+                label.setFont(self.highlight_font)
+            else:
+                label.setFont(self.normal_font)
