@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGrap
 
 from PyCHIP8.PyCHIP8 import MILLISECONDS_PER_REFRESH, INSTRUCTIONS_PER_REFRESH, TIMER_DECREMENTS_PER_REFRESH, Debugger
 
-from PyCHIP8.host.consts import KBD_TO_CHIP_8, SCALING_FACTOR
+from PyCHIP8.host.consts import KBD_TO_CHIP_8, SCALING_FACTOR, DEBUG_GO_FORWARD_KEY, DEBUG_GO_BACK_KEY
 from PyCHIP8.host.helpers import get_bytes
 
 from PyCHIP8.gui.debug import RegistersView
@@ -17,58 +17,125 @@ class CHIP8App(QApplication):
 
         self.machine = machine
         self.debugger = Debugger(machine)
+        self.debug_mode = False
 
         width = len(self.machine.frame_buffer)
         height = len(self.machine.frame_buffer[0])
         self.screen = CHIP8GameScreen(width, height, SCALING_FACTOR)
 
-        self.main_window = CHIP8MainWindow(self.screen, self.machine.keyboard, self.machine)
+        self.load_rom_action = QAction("Open file", self)
+        self.load_rom_action.setStatusTip("Open and load a ROM.")
+        self.load_rom_action.triggered.connect(self.load_rom)
+
+        self.toggle_debug_mode_action = QAction("Toggle Debug Mode", self)
+        self.toggle_debug_mode_action.setStatusTip("Toggle Debug Mode")
+        self.toggle_debug_mode_action.triggered.connect(self.toggle_debug_mode)
+
+        self.main_window = CHIP8MainWindow(
+            self.screen, self.machine.keyboard, self.machine, self.debugger,
+            [self.load_rom_action, self.toggle_debug_mode_action], self.debug_mode
+        )
 
         self.refresh_timer = QTimer()
         self.refresh_timer.setInterval(MILLISECONDS_PER_REFRESH)
         self.refresh_timer.timeout.connect(self.refresh)
-        self.refresh_timer.start()
+        if not self.debug_mode:
+            self.refresh_timer.start()
+
+        self.debug_info_refresher_timer = QTimer()
+        self.debug_info_refresher_timer.setInterval(MILLISECONDS_PER_REFRESH)
+        self.debug_info_refresher_timer.timeout.connect(self.refresh_debug_info)
+        if self.debug_mode:
+            self.debug_info_refresher_timer.start()
 
         self.main_window.show()
 
         self.registers_view = RegistersView(self.debugger)
-        self.registers_view.show()
+        if self.debug_mode:
+            self.registers_view.show()
 
     def refresh(self):
         for _ in range(INSTRUCTIONS_PER_REFRESH):
-            self.machine.run_one()
+            # always run the debugger even in non-debug mode to store previous states
+            self.debugger.run_one()
         self.machine.decrement_timers(TIMER_DECREMENTS_PER_REFRESH)
         self.screen.refresh(self.machine.frame_buffer)
 
+    def refresh_debug_info(self):
         self.registers_view.refresh()
+
+    def load_rom(self):
+        rom_name, _ = QFileDialog.getOpenFileName(self.main_window, "Open ROM", "")
+        if rom_name:
+            self.machine.load_program_from_bytes(get_bytes(rom_name))
+
+    def toggle_debug_mode(self):
+        if self.debug_mode:
+            self.debug_mode = False
+            self.main_window.set_debug_mode(False)
+            self.refresh_timer.start()
+            self.registers_view.hide()
+            self.debug_info_refresher_timer.stop()
+        else:
+            self.debug_mode = True
+            self.main_window.set_debug_mode(True)
+            self.refresh_timer.stop()
+            self.registers_view.show()
+            self.debug_info_refresher_timer.start()
 
 
 class CHIP8MainWindow(QMainWindow):
-    def __init__(self, game_screen, keyboard, machine):
+    def __init__(self, game_screen, keyboard, machine, debugger, actions, debug_mode):
         super().__init__()
 
         self.game_screen = game_screen
         self.keyboard = keyboard
         self.machine = machine
 
-        self.load_rom_action = QAction("Open file", self)
-        self.load_rom_action.setStatusTip("Open and load a ROM.")
-        self.load_rom_action.triggered.connect(self.load_rom)
+        self.debug_mode = debug_mode
+        self.debugger = debugger
+        # Number of instructions executed in debug mode since last refresh. Since time doesn't flow in debug mode,
+        # we use this to determine how much time has passed.
+        self.ins_executed_since_refresh = 0
 
-        self.toolbar = CHIP8ToolBar([self.load_rom_action])
+        self.toolbar = CHIP8ToolBar(actions)
         self.addToolBar(self.toolbar)
 
         self.setCentralWidget(game_screen)
         self.setWindowTitle("CHIP-8")
 
-    def load_rom(self):
-        rom_name, _ = QFileDialog.getOpenFileName(self, "Open ROM", "")
-        if rom_name:
-            self.machine.load_program_from_bytes(get_bytes(rom_name))
+    def set_debug_mode(self, mode):
+        self.debug_mode = mode
+
+    def debugger_go_forward(self):
+        self.debugger.run_one()
+
+        # Refresh screen as soon as an instruction executes to reflect the changes that instruction might have caused
+        self.game_screen.refresh(self.machine.frame_buffer)
+
+        self.ins_executed_since_refresh += 1
+        self.ins_executed_since_refresh %= INSTRUCTIONS_PER_REFRESH
+        if self.ins_executed_since_refresh == 0:
+            self.machine.decrement_timers(TIMER_DECREMENTS_PER_REFRESH)
+
+    def debugger_go_back(self):
+        self.debugger.go_back_one()
+
+        # Refresh screen as soon as an instruction executes to reflect the changes that instruction might have caused
+        self.game_screen.refresh(self.machine.frame_buffer)
+
+        self.ins_executed_since_refresh -= 1
+        self.ins_executed_since_refresh %= INSTRUCTIONS_PER_REFRESH
 
     def keyPressEvent(self, event):
-        if (key := event.key()) in KBD_TO_CHIP_8:
+        key = event.key()
+        if key in KBD_TO_CHIP_8:
             self.keyboard.set_key_pressed(KBD_TO_CHIP_8[key])
+        if self.debug_mode:
+            if key == DEBUG_GO_FORWARD_KEY:
+                self.debugger_go_forward()
+            elif key == DEBUG_GO_BACK_KEY:
+                self.debugger_go_back()
 
     def keyReleaseEvent(self, event):
         if (key := event.key()) in KBD_TO_CHIP_8:

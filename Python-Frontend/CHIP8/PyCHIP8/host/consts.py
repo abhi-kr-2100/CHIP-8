@@ -23,3 +23,6 @@ KBD_TO_CHIP_8 = {
     Qt.Key.Key_F: Key.KE,
     Qt.Key.Key_V: Key.KF,
 }
+
+DEBUG_GO_FORWARD_KEY = Qt.Key.Key_Space
+DEBUG_GO_BACK_KEY = Qt.Key.Key_Backspace
