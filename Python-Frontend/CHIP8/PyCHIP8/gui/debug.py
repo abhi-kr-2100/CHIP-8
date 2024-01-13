@@ -56,7 +56,7 @@ class MemoryView(QWidget):
 
     def refresh(self):
         for i, (label, memory) in enumerate(zip(self.memory_labels, self.debugger.memory)):
-            label.setText(f"{memory:#04x}")
+            label.setText(f"{i:#04}: {memory:#04x}" + (" ← [PC]" if i == self.debugger.pc else ""))
             if i == self.debugger.pc:
                 label.setFont(self.highlight_font)
             else:
