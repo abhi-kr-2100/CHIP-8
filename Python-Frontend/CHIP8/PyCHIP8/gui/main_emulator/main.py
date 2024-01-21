@@ -45,8 +45,12 @@ class CHIP8App(QApplication):
 
     def refresh(self):
         for _ in range(INSTRUCTIONS_PER_REFRESH):
-            # always run the debugger even in non-debug mode to store previous states
-            debugger.run_one_without_callback()
+            if self.execution_mode == ExecutionMode.NORMAL:
+                # always run the debugger even in non-debug mode to store previous states
+                debugger.run_one_without_callback()
+            elif self.execution_mode == ExecutionMode.DEBUG:
+                # in debug mode, the callbacks are used to refresh debug window information
+                debugger.run_one()
         machine.decrement_timers(TIMER_DECREMENTS_PER_REFRESH)
         self.screen.refresh()
 
@@ -92,8 +96,6 @@ class CHIP8MainWindow(QMainWindow):
     def __init__(self, game_screen, actions, execution_mode):
         super().__init__()
 
-        debugger.on_exec(lambda: self.game_screen.refresh())
-
         self.game_screen = game_screen
 
         self.execution_mode = execution_mode
@@ -119,6 +121,7 @@ class CHIP8MainWindow(QMainWindow):
         self.ins_executed_since_refresh %= INSTRUCTIONS_PER_REFRESH
         if self.ins_executed_since_refresh == 0:
             machine.decrement_timers(TIMER_DECREMENTS_PER_REFRESH)
+            self.game_screen.refresh()
 
     def debugger_go_back(self):
         assert self.execution_mode == ExecutionMode.BREAK, "Step-by-step execution is only available in BREAK mode."
@@ -127,6 +130,8 @@ class CHIP8MainWindow(QMainWindow):
 
         self.ins_executed_since_refresh -= 1
         self.ins_executed_since_refresh %= INSTRUCTIONS_PER_REFRESH
+        if self.ins_executed_since_refresh == 0:
+            self.game_screen.refresh()
 
     def keyPressEvent(self, event):
         key = event.key()
