@@ -22,5 +22,7 @@ class RegistersView(QListView):
     def __init__(self):
         super().__init__()
 
+        self.setUniformItemSizes(True)
+
         self.setWindowTitle("Registers")
         self.setModel(RegistersModel())

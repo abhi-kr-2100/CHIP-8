@@ -22,5 +22,7 @@ class MemoryView(QListView):
     def __init__(self):
         super().__init__()
 
+        self.setUniformItemSizes(True)
+
         self.setWindowTitle("Memory")
         self.setModel(MemoryModel())
