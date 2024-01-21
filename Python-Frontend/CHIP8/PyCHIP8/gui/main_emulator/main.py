@@ -1,13 +1,11 @@
 from PySide6.QtCore import QTimer
-from PySide6.QtGui import QImage, QPixmap
-from PySide6.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QMainWindow, QToolBar, \
-    QFileDialog
+from PySide6.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QMainWindow, QToolBar, QFileDialog
 
 from PyCHIP8.PyCHIP8 import MILLISECONDS_PER_REFRESH, INSTRUCTIONS_PER_REFRESH, TIMER_DECREMENTS_PER_REFRESH, Debugger
 from PyCHIP8.emulator import machine, debugger
 
 from PyCHIP8.host.consts import KBD_TO_CHIP_8, SCALING_FACTOR, DEBUG_GO_FORWARD_KEY, DEBUG_GO_BACK_KEY
-from PyCHIP8.host.helpers import get_bytes
+from PyCHIP8.host.helpers import get_bytes, get_graphics_from_frame_buffer
 
 from PyCHIP8.gui.debugger.registers import RegistersView
 from PyCHIP8.gui.debugger.memory import MemoryView
@@ -155,15 +153,7 @@ class CHIP8GameScreenScene(QGraphicsScene):
     def refresh(self):
         self.clear()
 
-        width = len(machine.frame_buffer)
-        height = len(machine.frame_buffer[0])
-
-        img = QImage(width, height, QImage.Format.Format_Mono)
-        for x, row in enumerate(machine.frame_buffer):
-            for y, pixel in enumerate(row):
-                img.setPixel(x, y, 0 if pixel else 1)
-
-        pixmap = QPixmap.fromImage(img)
-        self.addItem(QGraphicsPixmapItem(pixmap))
+        item = get_graphics_from_frame_buffer(machine.frame_buffer)
+        self.addItem(item)
 
         self.update()
