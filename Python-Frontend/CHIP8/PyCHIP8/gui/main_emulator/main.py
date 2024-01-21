@@ -5,7 +5,7 @@ from PyCHIP8.PyCHIP8 import MILLISECONDS_PER_REFRESH, INSTRUCTIONS_PER_REFRESH, 
 from PyCHIP8.emulator import machine, debugger
 
 from PyCHIP8.host.consts import KBD_TO_CHIP_8, SCALING_FACTOR, DEBUG_GO_FORWARD_KEY, DEBUG_GO_BACK_KEY, ExecutionMode
-from PyCHIP8.host.helpers import get_bytes, get_graphics_from_frame_buffer
+from PyCHIP8.host.helpers import get_bytes, get_graphics_from_frame_buffer, affects_screen
 
 from PyCHIP8.gui.debugger.registers import RegistersView
 from PyCHIP8.gui.debugger.memory import MemoryView
@@ -45,14 +45,9 @@ class CHIP8App(QApplication):
 
     def refresh(self):
         for _ in range(INSTRUCTIONS_PER_REFRESH):
-            if self.execution_mode == ExecutionMode.NORMAL:
-                # always run the debugger even in non-debug mode to store previous states
-                debugger.run_one_without_callback()
-            elif self.execution_mode == ExecutionMode.DEBUG:
-                # in debug mode, the callbacks are used to refresh debug window information
-                debugger.run_one()
+            # always run the debugger even in non-debug mode to store previous states
+            debugger.run_one()
         machine.decrement_timers(TIMER_DECREMENTS_PER_REFRESH)
-        self.screen.refresh()
 
     def load_rom(self):
         rom_name, _ = QFileDialog.getOpenFileName(self.main_window, "Open ROM", "")
@@ -121,7 +116,6 @@ class CHIP8MainWindow(QMainWindow):
         self.ins_executed_since_refresh %= INSTRUCTIONS_PER_REFRESH
         if self.ins_executed_since_refresh == 0:
             machine.decrement_timers(TIMER_DECREMENTS_PER_REFRESH)
-            self.game_screen.refresh()
 
     def debugger_go_back(self):
         assert self.execution_mode == ExecutionMode.BREAK, "Step-by-step execution is only available in BREAK mode."
@@ -130,8 +124,6 @@ class CHIP8MainWindow(QMainWindow):
 
         self.ins_executed_since_refresh -= 1
         self.ins_executed_since_refresh %= INSTRUCTIONS_PER_REFRESH
-        if self.ins_executed_since_refresh == 0:
-            self.game_screen.refresh()
 
     def keyPressEvent(self, event):
         key = event.key()
@@ -159,6 +151,8 @@ class CHIP8GameScreen(QGraphicsView):
     def __init__(self, scaling_factor):
         super().__init__()
 
+        debugger.on_exec(self.refresh_if_needed)
+
         self.game_scene = CHIP8GameScreenScene()
         self.setScene(self.game_scene)
 
@@ -168,7 +162,9 @@ class CHIP8GameScreen(QGraphicsView):
         self.setMinimumSize(width * (scaling_factor + 1), height * (scaling_factor + 1))
         self.scale(scaling_factor, scaling_factor)
 
-    def refresh(self):
+    def refresh_if_needed(self, _, instruction):
+        if not affects_screen(instruction):
+            return
         self.game_scene.refresh()
         self.update()
 
