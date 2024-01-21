@@ -1,23 +1,24 @@
 from PySide6.QtCore import QStringListModel
 from PySide6.QtWidgets import QListView
 
+from PyCHIP8.emulator import debugger
+
 
 class MemoryModel(QStringListModel):
-    def __init__(self, debugger):
+    def __init__(self):
         super().__init__()
 
-        self.debugger = debugger
         self.refresh()  # first refresh so that something is visible
-        self.debugger.on_exec(lambda: self.refresh())
+        debugger.on_exec(lambda: self.refresh())
 
     def refresh(self):
-        items = [hex(item) for item in self.debugger.memory]
+        items = [hex(item) for item in debugger.memory]
         self.setStringList(items)
 
 
 class MemoryView(QListView):
-    def __init__(self, debugger):
+    def __init__(self):
         super().__init__()
 
         self.setWindowTitle("Memory")
-        self.setModel(MemoryModel(debugger))
+        self.setModel(MemoryModel())

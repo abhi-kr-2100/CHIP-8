@@ -2,9 +2,8 @@
 
 from sys import argv, exit, stderr
 
-from PyCHIP8.PyCHIP8 import CHIP_8
-
-from PyCHIP8.gui.main import CHIP8App
+from PyCHIP8.emulator import machine
+from PyCHIP8.gui.main_emulator.main import CHIP8App
 from PyCHIP8.host.helpers import get_bytes
 
 
@@ -13,11 +12,10 @@ def main():
         print(f"Usage: {argv[0]} [file]", file=stderr)
         exit(1)
 
-    machine = CHIP_8()
     if len(argv) == 2:
         machine.load_program_from_bytes(get_bytes(argv[1]))
 
-    app = CHIP8App(machine)
+    app = CHIP8App()
     return app.exec()
 
 

@@ -11,18 +11,16 @@ from PyCHIP8.host.helpers import get_bytes
 from PyCHIP8.gui.debugger.registers import RegistersView
 from PyCHIP8.gui.debugger.memory import MemoryView
 
+from PyCHIP8.emulator import machine, debugger
+
 
 class CHIP8App(QApplication):
-    def __init__(self, machine):
+    def __init__(self):
         super().__init__([])
 
-        self.machine = machine
-        self.debugger = Debugger(machine)
         self.debug_mode = False
 
-        width = len(self.machine.frame_buffer)
-        height = len(self.machine.frame_buffer[0])
-        self.screen = CHIP8GameScreen(width, height, SCALING_FACTOR)
+        self.screen = CHIP8GameScreen(SCALING_FACTOR)
 
         self.load_rom_action = QAction("Open file", self)
         self.load_rom_action.setStatusTip("Open and load a ROM.")
@@ -33,9 +31,7 @@ class CHIP8App(QApplication):
         self.toggle_debug_mode_action.triggered.connect(self.toggle_debug_mode)
 
         self.main_window = CHIP8MainWindow(
-            self.screen, self.machine.keyboard, self.machine, self.debugger,
-            [self.load_rom_action, self.toggle_debug_mode_action], self.debug_mode
-        )
+            self.screen, [self.load_rom_action, self.toggle_debug_mode_action], self.debug_mode)
 
         self.refresh_timer = QTimer()
         self.refresh_timer.setInterval(MILLISECONDS_PER_REFRESH)
@@ -45,7 +41,7 @@ class CHIP8App(QApplication):
 
         self.main_window.show()
 
-        self.extra_debug_windows = [RegistersView(self.debugger), MemoryView(self.debugger)]
+        self.extra_debug_windows = [RegistersView(), MemoryView()]
         if self.debug_mode:
             for debug_window in self.extra_debug_windows:
                 debug_window.show()
@@ -53,14 +49,14 @@ class CHIP8App(QApplication):
     def refresh(self):
         for _ in range(INSTRUCTIONS_PER_REFRESH):
             # always run the debugger even in non-debug mode to store previous states
-            self.debugger.run_one_without_callback()
-        self.machine.decrement_timers(TIMER_DECREMENTS_PER_REFRESH)
-        self.screen.refresh(self.machine.frame_buffer)
+            debugger.run_one_without_callback()
+        machine.decrement_timers(TIMER_DECREMENTS_PER_REFRESH)
+        self.screen.refresh()
 
     def load_rom(self):
         rom_name, _ = QFileDialog.getOpenFileName(self.main_window, "Open ROM", "")
         if rom_name:
-            self.machine.load_program_from_bytes(get_bytes(rom_name))
+            machine.load_program_from_bytes(get_bytes(rom_name))
 
     def toggle_debug_mode(self):
         if self.debug_mode:
@@ -77,15 +73,12 @@ class CHIP8App(QApplication):
 
 
 class CHIP8MainWindow(QMainWindow):
-    def __init__(self, game_screen, keyboard, machine, debugger, actions, debug_mode):
+    def __init__(self, game_screen, actions, debug_mode):
         super().__init__()
 
         self.game_screen = game_screen
-        self.keyboard = keyboard
-        self.machine = machine
 
         self.debug_mode = debug_mode
-        self.debugger = debugger
         # Number of instructions executed in debug mode since last refresh. Since time doesn't flow in debug mode,
         # we use this to determine how much time has passed.
         self.ins_executed_since_refresh = 0
@@ -100,21 +93,21 @@ class CHIP8MainWindow(QMainWindow):
         self.debug_mode = mode
 
     def debugger_go_forward(self):
-        self.debugger.run_one()
+        debugger.run_one()
 
         # Refresh screen as soon as an instruction executes to reflect the changes that instruction might have caused
-        self.game_screen.refresh(self.machine.frame_buffer)
+        self.game_screen.refresh()
 
         self.ins_executed_since_refresh += 1
         self.ins_executed_since_refresh %= INSTRUCTIONS_PER_REFRESH
         if self.ins_executed_since_refresh == 0:
-            self.machine.decrement_timers(TIMER_DECREMENTS_PER_REFRESH)
+            machine.decrement_timers(TIMER_DECREMENTS_PER_REFRESH)
 
     def debugger_go_back(self):
-        self.debugger.go_back_one()
+        debugger.go_back_one()
 
         # Refresh screen as soon as an instruction executes to reflect the changes that instruction might have caused
-        self.game_screen.refresh(self.machine.frame_buffer)
+        self.game_screen.refresh()
 
         self.ins_executed_since_refresh -= 1
         self.ins_executed_since_refresh %= INSTRUCTIONS_PER_REFRESH
@@ -122,7 +115,7 @@ class CHIP8MainWindow(QMainWindow):
     def keyPressEvent(self, event):
         key = event.key()
         if key in KBD_TO_CHIP_8:
-            self.keyboard.set_key_pressed(KBD_TO_CHIP_8[key])
+            machine.keyboard.set_key_pressed(KBD_TO_CHIP_8[key])
         if self.debug_mode:
             if key == DEBUG_GO_FORWARD_KEY:
                 self.debugger_go_forward()
@@ -131,7 +124,7 @@ class CHIP8MainWindow(QMainWindow):
 
     def keyReleaseEvent(self, event):
         if (key := event.key()) in KBD_TO_CHIP_8:
-            self.keyboard.set_key_released(KBD_TO_CHIP_8[key])
+            machine.keyboard.set_key_released(KBD_TO_CHIP_8[key])
 
 
 class CHIP8ToolBar(QToolBar):
@@ -142,17 +135,20 @@ class CHIP8ToolBar(QToolBar):
 
 
 class CHIP8GameScreen(QGraphicsView):
-    def __init__(self, width, height, scaling_factor):
+    def __init__(self, scaling_factor):
         super().__init__()
 
         self.game_scene = CHIP8GameScreenScene()
         self.setScene(self.game_scene)
 
+        width = len(machine.frame_buffer)
+        height = len(machine.frame_buffer[0])
+
         self.setMinimumSize(width * (scaling_factor + 1), height * (scaling_factor + 1))
         self.scale(scaling_factor, scaling_factor)
 
-    def refresh(self, frame_buffer):
-        self.game_scene.refresh(frame_buffer)
+    def refresh(self):
+        self.game_scene.refresh()
         self.update()
 
 
@@ -161,14 +157,14 @@ class CHIP8GameScreenScene(QGraphicsScene):
         super().__init__()
         self.addText("Empty!")
 
-    def refresh(self, new_frame_buffer):
+    def refresh(self):
         self.clear()
 
-        width = len(new_frame_buffer)
-        height = len(new_frame_buffer[0])
+        width = len(machine.frame_buffer)
+        height = len(machine.frame_buffer[0])
 
         img = QImage(width, height, QImage.Format.Format_Mono)
-        for x, row in enumerate(new_frame_buffer):
+        for x, row in enumerate(machine.frame_buffer):
             for y, pixel in enumerate(row):
                 img.setPixel(x, y, 0 if pixel else 1)
 
