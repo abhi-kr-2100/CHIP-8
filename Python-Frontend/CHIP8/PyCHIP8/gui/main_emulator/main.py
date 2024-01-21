@@ -35,9 +35,8 @@ class CHIP8App(QApplication):
         self.main_window.show()
 
         self.extra_debug_windows = [RegistersView(), MemoryView()]
-        if self.debug_mode:
-            for debug_window in self.extra_debug_windows:
-                debug_window.show()
+        for debug_window in self.extra_debug_windows:
+            debug_window.setVisible(self.debug_mode)
 
     def refresh(self):
         for _ in range(INSTRUCTIONS_PER_REFRESH):
@@ -54,13 +53,12 @@ class CHIP8App(QApplication):
     def toggle_debug_mode(self):
         if self.debug_mode:
             self.debug_mode = False
-            self.main_window.set_debug_mode(False)
             self.refresh_timer.start()
         else:
             self.debug_mode = True
-            self.main_window.set_debug_mode(True)
             self.refresh_timer.stop()
 
+        self.main_window.set_debug_mode(self.debug_mode)
         for debug_window in self.extra_debug_windows:
             debug_window.setVisible(self.debug_mode)
 
