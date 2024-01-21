@@ -8,7 +8,8 @@ from PyCHIP8.PyCHIP8 import MILLISECONDS_PER_REFRESH, INSTRUCTIONS_PER_REFRESH, 
 from PyCHIP8.host.consts import KBD_TO_CHIP_8, SCALING_FACTOR, DEBUG_GO_FORWARD_KEY, DEBUG_GO_BACK_KEY
 from PyCHIP8.host.helpers import get_bytes
 
-from PyCHIP8.gui.debug import RegistersView, MemoryView
+from PyCHIP8.gui.debugger.registers import RegistersView
+from PyCHIP8.gui.debugger.memory import MemoryView
 
 
 class CHIP8App(QApplication):
