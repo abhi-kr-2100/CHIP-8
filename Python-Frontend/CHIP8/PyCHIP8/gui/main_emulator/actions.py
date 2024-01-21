@@ -14,10 +14,29 @@ class ToggleBreakModeAction(QAction):
     def __init__(self, parent):
         super().__init__("", parent)
 
-        self.setText("Pause" if self.parent().execution_mode != ExecutionMode.BREAK else "Resume")
+        self.refresh_name()
         self.setStatusTip("Toggle Break Mode.")
         self.triggered.connect(self.trigger_action)
 
     def trigger_action(self):
         self.parent().toggle_break_mode()
+        self.refresh_name()
+
+    def refresh_name(self):
         self.setText("Pause" if self.parent().execution_mode != ExecutionMode.BREAK else "Resume")
+
+
+class ToggleDebugMode(QAction):
+    def __init__(self, parent):
+        super().__init__("", parent)
+
+        self.refresh_name()
+        self.setStatusTip("Toggle Debug Mode.")
+        self.triggered.connect(self.trigger_action)
+
+    def trigger_action(self):
+        self.parent().toggle_debug_mode()
+        self.refresh_name()
+
+    def refresh_name(self):
+        self.setText("Debug" if self.parent().execution_mode == ExecutionMode.NORMAL else "Turn off debugging")

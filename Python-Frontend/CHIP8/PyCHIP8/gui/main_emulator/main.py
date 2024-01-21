@@ -9,23 +9,27 @@ from PyCHIP8.host.helpers import get_bytes, get_graphics_from_frame_buffer
 
 from PyCHIP8.gui.debugger.registers import RegistersView
 from PyCHIP8.gui.debugger.memory import MemoryView
-from PyCHIP8.gui.main_emulator.actions import LoadROMAction, ToggleBreakModeAction
+from PyCHIP8.gui.main_emulator.actions import LoadROMAction, ToggleBreakModeAction, ToggleDebugMode
 
 
 class CHIP8App(QApplication):
     def __init__(self):
         super().__init__([])
 
+        self.previous_execution_mode = None
         self.execution_mode = ExecutionMode.NORMAL
 
         self.screen = CHIP8GameScreen(SCALING_FACTOR)
 
         self.load_rom_action = LoadROMAction(self)
         self.toggle_break_mode_action = ToggleBreakModeAction(self)
-        self.toggle_
+        self.toggle_debug_mode_action = ToggleDebugMode(self)
 
         self.main_window = CHIP8MainWindow(
-            self.screen, [self.load_rom_action, self.toggle_break_mode_action], self.execution_mode)
+            self.screen,
+            [self.load_rom_action, self.toggle_break_mode_action, self.toggle_debug_mode_action],
+            self.execution_mode
+        )
 
         self.refresh_timer = QTimer()
         self.refresh_timer.setInterval(MILLISECONDS_PER_REFRESH)
@@ -52,16 +56,36 @@ class CHIP8App(QApplication):
             machine.load_program_from_bytes(get_bytes(rom_name))
 
     def toggle_break_mode(self):
-        if self.execution_mode in [ExecutionMode.DEBUG, ExecutionMode.BREAK]:
-            self.execution_mode = ExecutionMode.NORMAL
+        previous_execution_mode = self.execution_mode
+        if self.execution_mode == ExecutionMode.BREAK:
+            self.execution_mode = ExecutionMode.DEBUG if self.previous_execution_mode == ExecutionMode.DEBUG else \
+                ExecutionMode.NORMAL
             self.refresh_timer.start()
         else:
             self.execution_mode = ExecutionMode.BREAK
             self.refresh_timer.stop()
+        self.previous_execution_mode = previous_execution_mode
 
         self.main_window.set_execution_mode(self.execution_mode)
         for debug_window in self.extra_debug_windows:
             debug_window.setVisible(self.execution_mode != ExecutionMode.NORMAL)
+        self.toggle_break_mode_action.refresh_name()
+        self.toggle_debug_mode_action.refresh_name()
+
+    def toggle_debug_mode(self):
+        previous_execution_mode = self.execution_mode
+        if self.execution_mode in [ExecutionMode.DEBUG, ExecutionMode.BREAK]:
+            self.execution_mode = ExecutionMode.NORMAL
+            self.refresh_timer.start()
+        else:
+            self.execution_mode = ExecutionMode.DEBUG
+        self.previous_execution_mode = previous_execution_mode
+
+        self.main_window.set_execution_mode(self.execution_mode)
+        for debug_window in self.extra_debug_windows:
+            debug_window.setVisible(self.execution_mode != ExecutionMode.NORMAL)
+        self.toggle_break_mode_action.refresh_name()
+        self.toggle_debug_mode_action.refresh_name()
 
 
 class CHIP8MainWindow(QMainWindow):
