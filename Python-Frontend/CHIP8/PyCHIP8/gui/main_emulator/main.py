@@ -69,6 +69,8 @@ class CHIP8MainWindow(QMainWindow):
     def __init__(self, game_screen, actions, debug_mode):
         super().__init__()
 
+        debugger.on_exec(lambda: self.game_screen.refresh())
+
         self.game_screen = game_screen
 
         self.debug_mode = debug_mode
@@ -88,9 +90,6 @@ class CHIP8MainWindow(QMainWindow):
     def debugger_go_forward(self):
         debugger.run_one()
 
-        # Refresh screen as soon as an instruction executes to reflect the changes that instruction might have caused
-        self.game_screen.refresh()
-
         self.ins_executed_since_refresh += 1
         self.ins_executed_since_refresh %= INSTRUCTIONS_PER_REFRESH
         if self.ins_executed_since_refresh == 0:
@@ -98,9 +97,6 @@ class CHIP8MainWindow(QMainWindow):
 
     def debugger_go_back(self):
         debugger.go_back_one()
-
-        # Refresh screen as soon as an instruction executes to reflect the changes that instruction might have caused
-        self.game_screen.refresh()
 
         self.ins_executed_since_refresh -= 1
         self.ins_executed_since_refresh %= INSTRUCTIONS_PER_REFRESH
