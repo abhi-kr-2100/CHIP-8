@@ -1,17 +1,17 @@
 from PySide6.QtCore import QTimer
-from PySide6.QtGui import QImage, QPixmap, QAction
+from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QMainWindow, QToolBar, \
     QFileDialog
 
 from PyCHIP8.PyCHIP8 import MILLISECONDS_PER_REFRESH, INSTRUCTIONS_PER_REFRESH, TIMER_DECREMENTS_PER_REFRESH, Debugger
+from PyCHIP8.emulator import machine, debugger
 
 from PyCHIP8.host.consts import KBD_TO_CHIP_8, SCALING_FACTOR, DEBUG_GO_FORWARD_KEY, DEBUG_GO_BACK_KEY
 from PyCHIP8.host.helpers import get_bytes
 
 from PyCHIP8.gui.debugger.registers import RegistersView
 from PyCHIP8.gui.debugger.memory import MemoryView
-
-from PyCHIP8.emulator import machine, debugger
+from PyCHIP8.gui.main_emulator.actions import LoadROMAction, ToggleDebugModeAction
 
 
 class CHIP8App(QApplication):
@@ -22,13 +22,8 @@ class CHIP8App(QApplication):
 
         self.screen = CHIP8GameScreen(SCALING_FACTOR)
 
-        self.load_rom_action = QAction("Open file", self)
-        self.load_rom_action.setStatusTip("Open and load a ROM.")
-        self.load_rom_action.triggered.connect(self.load_rom)
-
-        self.toggle_debug_mode_action = QAction("Toggle Debug Mode", self)
-        self.toggle_debug_mode_action.setStatusTip("Toggle Debug Mode")
-        self.toggle_debug_mode_action.triggered.connect(self.toggle_debug_mode)
+        self.load_rom_action = LoadROMAction(self)
+        self.toggle_debug_mode_action = ToggleDebugModeAction(self)
 
         self.main_window = CHIP8MainWindow(
             self.screen, [self.load_rom_action, self.toggle_debug_mode_action], self.debug_mode)
