@@ -73,6 +73,11 @@ const std::array<byte, MEMORY_SIZE>& Debugger::get_memory() const
 	return machine.memory;
 }
 
+const std::array<byte, NUM_REGISTERS>& Debugger::get_registers() const
+{
+	return machine.registers;
+}
+
 byte Debugger::get_register(size_t i) const
 {
 	return machine.registers[i];

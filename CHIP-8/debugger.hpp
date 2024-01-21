@@ -23,6 +23,7 @@ public:
 	void on_exec(const std::function<void()>& f);
 
 	const std::array<byte, MEMORY_SIZE>& get_memory() const;
+	const std::array<byte, NUM_REGISTERS>& get_registers() const;
 	byte get_register(size_t i) const;
 	double_byte get_pc() const;
 	double_byte get_index_register() const;

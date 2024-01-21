@@ -30,6 +30,7 @@ PYBIND11_MODULE(PyCHIP8, m)
 		.def("set_memory_byte", &Debugger::set_memory_byte)
 		.def("get_register", &Debugger::get_register)
 		.def("set_register", &Debugger::set_register)
+		.def_property_readonly("registers", &Debugger::get_registers)
 		.def_property("pc", &Debugger::get_pc, &Debugger::set_pc)
 		.def_property("index_register", &Debugger::get_index_register,
 					  &Debugger::set_index_register)
