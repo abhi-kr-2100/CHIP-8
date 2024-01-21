@@ -12,6 +12,30 @@ Debugger::Debugger(CHIP_8& machine)
 
 bool Debugger::run_one()
 {
+	const auto can_run_more = run_one_without_callback();
+
+	for (const auto& f : callbacks)
+	{
+		f();
+	}
+
+	return can_run_more;
+}
+
+bool Debugger::go_back_one()
+{
+	const auto can_go_back_more = go_back_one_without_callback();
+
+	for (const auto& f : callbacks)
+	{
+		f();
+	}
+
+	return can_go_back_more;
+}
+
+bool Debugger::run_one_without_callback()
+{
 	const auto current_state = Machine_state{
 		machine.memory,
 		machine.registers,
@@ -29,7 +53,7 @@ bool Debugger::run_one()
 	return machine.run_one();
 }
 
-bool Debugger::go_back_one()
+bool Debugger::go_back_one_without_callback()
 {
 	const auto& most_recent_state = states.top();
 	states.pop();
@@ -37,6 +61,11 @@ bool Debugger::go_back_one()
 	machine.load_state(most_recent_state);
 
 	return !states.empty();
+}
+
+void Debugger::on_exec(const std::function<void()>& f)
+{
+	callbacks.push_back(f);
 }
 
 const std::array<byte, MEMORY_SIZE>& Debugger::get_memory() const

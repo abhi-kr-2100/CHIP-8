@@ -7,6 +7,7 @@ class RegistersView(QWidget):
         super().__init__()
 
         self.debugger = debugger
+        self.debugger.on_exec(lambda: self.refresh())
 
         self.setWindowTitle("Registers View")
 
@@ -36,6 +37,7 @@ class MemoryView(QWidget):
         super().__init__()
 
         self.debugger = debugger
+        self.debugger.on_exec(lambda: self.refresh())
 
         self.setWindowTitle("Memory View")
 

@@ -42,12 +42,6 @@ class CHIP8App(QApplication):
         if not self.debug_mode:
             self.refresh_timer.start()
 
-        self.debug_info_refresher_timer = QTimer()
-        self.debug_info_refresher_timer.setInterval(MILLISECONDS_PER_REFRESH)
-        self.debug_info_refresher_timer.timeout.connect(self.refresh_debug_info)
-        if self.debug_mode:
-            self.debug_info_refresher_timer.start()
-
         self.main_window.show()
 
         self.extra_debug_windows = [RegistersView(self.debugger), MemoryView(self.debugger)]
@@ -58,13 +52,9 @@ class CHIP8App(QApplication):
     def refresh(self):
         for _ in range(INSTRUCTIONS_PER_REFRESH):
             # always run the debugger even in non-debug mode to store previous states
-            self.debugger.run_one()
+            self.debugger.run_one_without_callback()
         self.machine.decrement_timers(TIMER_DECREMENTS_PER_REFRESH)
         self.screen.refresh(self.machine.frame_buffer)
-
-    def refresh_debug_info(self):
-        for debug_window in self.extra_debug_windows:
-            debug_window.refresh()
 
     def load_rom(self):
         rom_name, _ = QFileDialog.getOpenFileName(self.main_window, "Open ROM", "")
@@ -76,12 +66,10 @@ class CHIP8App(QApplication):
             self.debug_mode = False
             self.main_window.set_debug_mode(False)
             self.refresh_timer.start()
-            self.debug_info_refresher_timer.stop()
         else:
             self.debug_mode = True
             self.main_window.set_debug_mode(True)
             self.refresh_timer.stop()
-            self.debug_info_refresher_timer.start()
 
         for debug_window in self.extra_debug_windows:
             debug_window.setVisible(self.debug_mode)

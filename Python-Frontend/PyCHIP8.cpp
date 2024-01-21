@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/functional.h>
 
 #include "CHIP-8.hpp"
 #include "keyboard.hpp"
@@ -31,7 +32,10 @@ PYBIND11_MODULE(PyCHIP8, m)
 		.def("set_register", &Debugger::set_register)
 		.def_property("pc", &Debugger::get_pc, &Debugger::set_pc)
 		.def_property("index_register", &Debugger::get_index_register,
-					  &Debugger::set_index_register);
+					  &Debugger::set_index_register)
+		.def("on_exec", &Debugger::on_exec)
+		.def("run_one_without_callback", &Debugger::run_one_without_callback)
+		.def("go_back_one_without_callback", &Debugger::go_back_one_without_callback);
 
 	py::class_<Keyboard>(m, "Keyboard")
 		.def(py::init())
