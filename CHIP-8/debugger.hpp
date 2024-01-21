@@ -20,7 +20,7 @@ public:
 	bool run_one_without_callback();
 	bool go_back_one_without_callback();
 
-	void on_exec(const std::function<void()>& f);
+	void on_exec(const std::function<void(Execution_event, const Instruction&)>& f);
 
 	const std::array<byte, MEMORY_SIZE>& get_memory() const;
 	const std::array<byte, NUM_REGISTERS>& get_registers() const;
@@ -36,5 +36,5 @@ private:
 	CHIP_8& machine;
 	std::stack<Machine_state> states;
 
-	std::vector<std::function<void()>> callbacks;
+	std::vector<std::function<void(Execution_event, const Instruction&)>> callbacks;
 };

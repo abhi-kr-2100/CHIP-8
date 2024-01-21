@@ -44,6 +44,10 @@ PYBIND11_MODULE(PyCHIP8, m)
 		.def("set_key_released", &Keyboard::set_key_released)
 		.def("is_key_pressed", &Keyboard::is_key_pressed);
 
+	py::class_<Instruction>(m, "Instruction")
+		.def_readonly("raw", &Instruction::raw_instruction)
+		.def_readonly("category", &Instruction::category);
+
 	py::enum_<Key>(m, "Key")
 		.value("K0", Key::K0)
 		.value("K1", Key::K1)
@@ -62,6 +66,11 @@ PYBIND11_MODULE(PyCHIP8, m)
 		.value("KE", Key::KE)
 		.value("KF", Key::KF)
 		.value("NONE", Key::NONE)
+		.export_values();
+
+	py::enum_<Execution_event>(m, "ExecutionEvent")
+		.value("RUN_ONE", Execution_event::RUN_ONE)
+		.value("GO_BACK_ONE", Execution_event::GO_BACK_ONE)
 		.export_values();
 
 	m.attr("MILLISECONDS_PER_REFRESH") = MILLISECONDS_PER_REFRESH;

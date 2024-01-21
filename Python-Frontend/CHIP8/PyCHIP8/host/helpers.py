@@ -26,3 +26,21 @@ def get_graphics_from_frame_buffer(frame_buffer):
 
     pixmap = QPixmap.fromImage(img)
     return QGraphicsPixmapItem(pixmap)
+
+
+def affects_registers(instruction):
+    return instruction.category in {
+        0x6, 0x7, 0x8, 0xA, 0xC, 0xD, 0xF,
+    }
+
+
+def affects_memory(instruction):
+    return instruction.category in {
+        0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x9, 0xB, 0xE,
+    }
+
+
+def affects_screen(instruction):
+    return instruction.category in {
+        0xD,
+    }

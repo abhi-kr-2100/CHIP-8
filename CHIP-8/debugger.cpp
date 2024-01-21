@@ -12,11 +12,12 @@ Debugger::Debugger(CHIP_8& machine)
 
 bool Debugger::run_one()
 {
+	const auto& executed_instruction = machine.get_current_instruction();
 	const auto can_run_more = run_one_without_callback();
 
 	for (const auto& f : callbacks)
 	{
-		f();
+		f(Execution_event::RUN_ONE, executed_instruction);
 	}
 
 	return can_run_more;
@@ -25,10 +26,11 @@ bool Debugger::run_one()
 bool Debugger::go_back_one()
 {
 	const auto can_go_back_more = go_back_one_without_callback();
+	const auto& undone_instruction = machine.get_current_instruction();
 
 	for (const auto& f : callbacks)
 	{
-		f();
+		f(Execution_event::GO_BACK_ONE, undone_instruction);
 	}
 
 	return can_go_back_more;
@@ -63,7 +65,7 @@ bool Debugger::go_back_one_without_callback()
 	return !states.empty();
 }
 
-void Debugger::on_exec(const std::function<void()>& f)
+void Debugger::on_exec(const std::function<void(Execution_event, const Instruction&)>& f)
 {
 	callbacks.push_back(f);
 }

@@ -59,3 +59,8 @@ struct Machine_state
 
 	bool is_blocked;
 };
+
+enum class Execution_event
+{
+	RUN_ONE, GO_BACK_ONE
+};
