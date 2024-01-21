@@ -4,39 +4,40 @@ from PySide6.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QMain
 from PyCHIP8.PyCHIP8 import MILLISECONDS_PER_REFRESH, INSTRUCTIONS_PER_REFRESH, TIMER_DECREMENTS_PER_REFRESH
 from PyCHIP8.emulator import machine, debugger
 
-from PyCHIP8.host.consts import KBD_TO_CHIP_8, SCALING_FACTOR, DEBUG_GO_FORWARD_KEY, DEBUG_GO_BACK_KEY
+from PyCHIP8.host.consts import KBD_TO_CHIP_8, SCALING_FACTOR, DEBUG_GO_FORWARD_KEY, DEBUG_GO_BACK_KEY, ExecutionMode
 from PyCHIP8.host.helpers import get_bytes, get_graphics_from_frame_buffer
 
 from PyCHIP8.gui.debugger.registers import RegistersView
 from PyCHIP8.gui.debugger.memory import MemoryView
-from PyCHIP8.gui.main_emulator.actions import LoadROMAction, ToggleDebugModeAction
+from PyCHIP8.gui.main_emulator.actions import LoadROMAction, ToggleBreakModeAction
 
 
 class CHIP8App(QApplication):
     def __init__(self):
         super().__init__([])
 
-        self.debug_mode = False
+        self.execution_mode = ExecutionMode.NORMAL
 
         self.screen = CHIP8GameScreen(SCALING_FACTOR)
 
         self.load_rom_action = LoadROMAction(self)
-        self.toggle_debug_mode_action = ToggleDebugModeAction(self)
+        self.toggle_break_mode_action = ToggleBreakModeAction(self)
+        self.toggle_
 
         self.main_window = CHIP8MainWindow(
-            self.screen, [self.load_rom_action, self.toggle_debug_mode_action], self.debug_mode)
+            self.screen, [self.load_rom_action, self.toggle_break_mode_action], self.execution_mode)
 
         self.refresh_timer = QTimer()
         self.refresh_timer.setInterval(MILLISECONDS_PER_REFRESH)
         self.refresh_timer.timeout.connect(self.refresh)
-        if not self.debug_mode:
+        if self.execution_mode == ExecutionMode.NORMAL:
             self.refresh_timer.start()
 
         self.main_window.show()
 
         self.extra_debug_windows = [RegistersView(), MemoryView()]
         for debug_window in self.extra_debug_windows:
-            debug_window.setVisible(self.debug_mode)
+            debug_window.setVisible(self.execution_mode != ExecutionMode.NORMAL)
 
     def refresh(self):
         for _ in range(INSTRUCTIONS_PER_REFRESH):
@@ -50,28 +51,28 @@ class CHIP8App(QApplication):
         if rom_name:
             machine.load_program_from_bytes(get_bytes(rom_name))
 
-    def toggle_debug_mode(self):
-        if self.debug_mode:
-            self.debug_mode = False
+    def toggle_break_mode(self):
+        if self.execution_mode in [ExecutionMode.DEBUG, ExecutionMode.BREAK]:
+            self.execution_mode = ExecutionMode.NORMAL
             self.refresh_timer.start()
         else:
-            self.debug_mode = True
+            self.execution_mode = ExecutionMode.BREAK
             self.refresh_timer.stop()
 
-        self.main_window.set_debug_mode(self.debug_mode)
+        self.main_window.set_execution_mode(self.execution_mode)
         for debug_window in self.extra_debug_windows:
-            debug_window.setVisible(self.debug_mode)
+            debug_window.setVisible(self.execution_mode != ExecutionMode.NORMAL)
 
 
 class CHIP8MainWindow(QMainWindow):
-    def __init__(self, game_screen, actions, debug_mode):
+    def __init__(self, game_screen, actions, execution_mode):
         super().__init__()
 
         debugger.on_exec(lambda: self.game_screen.refresh())
 
         self.game_screen = game_screen
 
-        self.debug_mode = debug_mode
+        self.execution_mode = execution_mode
         # Number of instructions executed in debug mode since last refresh. Since time doesn't flow in debug mode,
         # we use this to determine how much time has passed.
         self.ins_executed_since_refresh = 0
@@ -82,10 +83,12 @@ class CHIP8MainWindow(QMainWindow):
         self.setCentralWidget(game_screen)
         self.setWindowTitle("CHIP-8")
 
-    def set_debug_mode(self, mode):
-        self.debug_mode = mode
+    def set_execution_mode(self, mode):
+        self.execution_mode = mode
 
     def debugger_go_forward(self):
+        assert self.execution_mode == ExecutionMode.BREAK, "Step-by-step execution is only available in BREAK mode."
+
         debugger.run_one()
 
         self.ins_executed_since_refresh += 1
@@ -94,6 +97,8 @@ class CHIP8MainWindow(QMainWindow):
             machine.decrement_timers(TIMER_DECREMENTS_PER_REFRESH)
 
     def debugger_go_back(self):
+        assert self.execution_mode == ExecutionMode.BREAK, "Step-by-step execution is only available in BREAK mode."
+
         debugger.go_back_one()
 
         self.ins_executed_since_refresh -= 1
@@ -103,7 +108,7 @@ class CHIP8MainWindow(QMainWindow):
         key = event.key()
         if key in KBD_TO_CHIP_8:
             machine.keyboard.set_key_pressed(KBD_TO_CHIP_8[key])
-        if self.debug_mode:
+        if self.execution_mode:
             if key == DEBUG_GO_FORWARD_KEY:
                 self.debugger_go_forward()
             elif key == DEBUG_GO_BACK_KEY:

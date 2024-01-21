@@ -1,3 +1,5 @@
+from enum import Enum
+
 from PySide6.QtCore import Qt
 
 from PyCHIP8.PyCHIP8 import Key
@@ -26,3 +28,9 @@ KBD_TO_CHIP_8 = {
 
 DEBUG_GO_FORWARD_KEY = Qt.Key.Key_Space
 DEBUG_GO_BACK_KEY = Qt.Key.Key_Backspace
+
+
+class ExecutionMode(Enum):
+    NORMAL = 1
+    DEBUG = 2   # debug information window is shown, not that in comments, debug mode also refers to break mode
+    BREAK = 3   # gameplay is paused and debug mode is entered

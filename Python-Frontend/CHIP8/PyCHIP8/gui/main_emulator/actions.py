@@ -1,5 +1,7 @@
 from PySide6.QtGui import QAction
 
+from PyCHIP8.host.consts import ExecutionMode
+
 
 class LoadROMAction(QAction):
     def __init__(self, parent):
@@ -8,8 +10,14 @@ class LoadROMAction(QAction):
         self.triggered.connect(self.parent().load_rom)
 
 
-class ToggleDebugModeAction(QAction):
+class ToggleBreakModeAction(QAction):
     def __init__(self, parent):
-        super().__init__("Toggle Debug Mode", parent)
-        self.setStatusTip("Toggle Debug Mode.")
-        self.triggered.connect(self.parent().toggle_debug_mode)
+        super().__init__("", parent)
+
+        self.setText("Pause" if self.parent().execution_mode != ExecutionMode.BREAK else "Resume")
+        self.setStatusTip("Toggle Break Mode.")
+        self.triggered.connect(self.trigger_action)
+
+    def trigger_action(self):
+        self.parent().toggle_break_mode()
+        self.setText("Pause" if self.parent().execution_mode != ExecutionMode.BREAK else "Resume")
