@@ -1,7 +1,7 @@
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QMainWindow, QToolBar, QFileDialog
 
-from PyCHIP8.PyCHIP8 import MILLISECONDS_PER_REFRESH, INSTRUCTIONS_PER_REFRESH, TIMER_DECREMENTS_PER_REFRESH, Debugger
+from PyCHIP8.PyCHIP8 import MILLISECONDS_PER_REFRESH, INSTRUCTIONS_PER_REFRESH, TIMER_DECREMENTS_PER_REFRESH
 from PyCHIP8.emulator import machine, debugger
 
 from PyCHIP8.host.consts import KBD_TO_CHIP_8, SCALING_FACTOR, DEBUG_GO_FORWARD_KEY, DEBUG_GO_BACK_KEY
